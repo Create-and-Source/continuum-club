@@ -12,6 +12,11 @@ import Journal from './pages/Journal'
 import Portfolio from './pages/Portfolio'
 import Mentorship from './pages/Mentorship'
 import Profile from './pages/Profile'
+import About from './pages/About'
+import Apply from './pages/Apply'
+import Contact from './pages/Contact'
+import Admin from './pages/Admin'
+import MentorPortal from './pages/MentorPortal'
 import { fonts, P } from './theme'
 
 const quotes = [
@@ -194,6 +199,11 @@ export default function App() {
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/mentorship" element={<Mentorship />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/apply" element={<Apply />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/mentor-portal" element={<MentorPortal />} />
       </Routes>
       <TabBar />
     </div>

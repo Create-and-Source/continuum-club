@@ -156,13 +156,16 @@ export default function Profile() {
           { label: 'Portfolio', path: '/portfolio' },
           { label: 'Mentorship', path: '/mentorship' },
           { label: 'Journey', path: '/journey' },
+          { label: 'About Corella & Co', path: '/about' },
+          { label: 'Apply', path: '/apply' },
+          { label: 'Contact', path: '/contact' },
         ].map((link, i) => (
           <button key={i} onClick={() => navigate(link.path)} style={{
             width: '100%', background: colors.surface,
-            borderRadius: i === 0 ? `${radius.card}px ${radius.card}px 0 0` : i === 3 ? `0 0 ${radius.card}px ${radius.card}px` : 0,
+            borderRadius: i === 0 ? `${radius.card}px ${radius.card}px 0 0` : i === 6 ? `0 0 ${radius.card}px ${radius.card}px` : 0,
             padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: i < 3 ? `1px solid ${colors.border}` : 'none', cursor: 'pointer', border: 'none',
-            borderBottomStyle: i < 3 ? 'solid' : 'none', borderBottomWidth: i < 3 ? 1 : 0, borderBottomColor: colors.border,
+            borderBottom: i < 6 ? `1px solid ${colors.border}` : 'none', cursor: 'pointer', border: 'none',
+            borderBottomStyle: i < 6 ? 'solid' : 'none', borderBottomWidth: i < 6 ? 1 : 0, borderBottomColor: colors.border,
           }}>
             <span style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 600, color: colors.text }}>{link.label}</span>
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -193,8 +196,23 @@ export default function Profile() {
         ))}
       </motion.div>
 
+      {/* Staff Access */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.33 }} style={{ margin: '24px 16px 0' }}>
+        <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Staff</div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={() => navigate('/admin')} style={{
+            flex: 1, padding: '16px 0', borderRadius: radius.card, background: colors.surface, border: 'none',
+            fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+          }}>Admin</button>
+          <button onClick={() => navigate('/mentor-portal')} style={{
+            flex: 1, padding: '16px 0', borderRadius: radius.card, background: colors.surface, border: 'none',
+            fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+          }}>Mentor Portal</button>
+        </div>
+      </motion.div>
+
       {/* Reset */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} style={{ margin: '24px 16px 0' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }} style={{ margin: '24px 16px 0' }}>
         <button onClick={handleReset} style={{
           width: '100%', padding: '14px 0', borderRadius: radius.card, border: `1px solid ${colors.border}`, background: 'transparent',
           fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
