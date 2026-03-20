@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 
-const moods = ['Unstoppable', 'Focused', 'Growing', 'Rebuilding', 'Quiet']
+const moods = ['On Fire', 'Strong', 'Steady', 'Working On It', 'Gentle']
 
 const sparks = [
   { affirmation: '"You are not behind. You are exactly where your power needs you to be."', exercise: 'Mirror Talk: 60 seconds of eye contact with yourself. No words. Just presence.' },
@@ -13,11 +13,180 @@ const communityWins = [
   { name: 'Destiny M.', season: 'S12', avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer.' },
 ]
 
+const ritualSteps = [
+  { title: 'Grounding', instruction: 'Feel both feet flat on the floor. Press down. You are here.', seconds: 10 },
+  { title: 'Spine', instruction: 'Stack your spine. Crown of the head reaching up. Shoulders down and back.', seconds: 8 },
+  { title: 'Breath', instruction: 'Inhale through the nose for 4 counts. Hold 4. Exhale 6.', seconds: 14 },
+  { title: 'Eyes', instruction: 'Soften your gaze. Lift your chin slightly. Look forward, not down.', seconds: 8 },
+  { title: 'Affirmation', instruction: 'Say it quietly or in your mind: "I walk like I belong everywhere I go."', seconds: 10 },
+  { title: 'Walk', instruction: 'You are ready. Step forward with intention.', seconds: 6 },
+]
+
+function RitualOverlay({ onClose }) {
+  const [step, setStep] = useState(0)
+  const [countdown, setCountdown] = useState(ritualSteps[0].seconds)
+
+  const advanceStep = useCallback(() => {
+    if (step < ritualSteps.length - 1) {
+      const next = step + 1
+      setStep(next)
+      setCountdown(ritualSteps[next].seconds)
+    } else {
+      onClose()
+    }
+  }, [step, onClose])
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      advanceStep()
+      return
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown, advanceStep])
+
+  const current = ritualSteps[step]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+      onClick={advanceStep}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9998,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+      }}
+    >
+      {/* Background */}
+      <img
+        src={P.runway}
+        alt=""
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          filter: 'grayscale(100%) brightness(0.3)',
+        }}
+      />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+
+      {/* Content */}
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        padding: '0 32px',
+        maxWidth: 430,
+        textAlign: 'center',
+      }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.4 }}
+          >
+            {/* Step title */}
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 11,
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.4)',
+              letterSpacing: 3,
+              textTransform: 'uppercase',
+              marginBottom: 16,
+            }}>
+              Step {step + 1} of {ritualSteps.length}
+            </div>
+
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 28,
+              fontWeight: 900,
+              color: '#FFFFFF',
+              textTransform: 'uppercase',
+              letterSpacing: 1,
+              marginBottom: 20,
+            }}>
+              {current.title}
+            </div>
+
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 16,
+              fontWeight: 400,
+              color: 'rgba(255,255,255,0.7)',
+              lineHeight: 1.6,
+              marginBottom: 32,
+            }}>
+              {current.instruction}
+            </div>
+
+            {/* Countdown */}
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 48,
+              fontWeight: 900,
+              color: '#FFFFFF',
+              lineHeight: 1,
+              marginBottom: 40,
+            }}>
+              {countdown}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Progress dots */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+          {ritualSteps.map((_, i) => (
+            <div key={i} style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: i <= step ? '#FFFFFF' : 'rgba(255,255,255,0.2)',
+              transition: 'background 0.3s',
+            }} />
+          ))}
+        </div>
+
+        {/* Tap hint */}
+        <div style={{
+          fontFamily: fonts.sans,
+          fontSize: 10,
+          fontWeight: 500,
+          color: 'rgba(255,255,255,0.25)',
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          marginTop: 32,
+        }}>
+          Tap to skip
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function Home() {
   const [mood, setMood] = useState(null)
+  const [showRitual, setShowRitual] = useState(false)
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+      {/* Before I Walk Ritual Overlay */}
+      <AnimatePresence>
+        {showRitual && <RitualOverlay onClose={() => setShowRitual(false)} />}
+      </AnimatePresence>
+
       {/* Hero */}
       <div style={{ position: 'relative', height: 320, overflow: 'hidden' }}>
         <img
@@ -146,63 +315,79 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Daily Spark */}
+      {/* Daily Spark — Photo-backed hero card */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
         style={{
           margin: '16px 16px 0',
-          background: colors.surface,
           borderRadius: radius.card,
-          padding: 24,
+          overflow: 'hidden',
+          position: 'relative',
+          height: 220,
         }}
       >
+        {/* Background photo */}
+        <img
+          src={P.portrait}
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            filter: 'grayscale(100%)',
+          }}
+        />
         <div style={{
-          fontFamily: fonts.sans,
-          fontSize: 11,
-          fontWeight: 700,
-          color: colors.text3,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          marginBottom: 16,
-        }}>
-          Daily Spark
-        </div>
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%)',
+        }} />
+
+        {/* Content overlay */}
         <div style={{
-          fontFamily: fonts.sans,
-          fontSize: 18,
-          fontWeight: 400,
-          fontStyle: 'italic',
-          color: colors.text,
-          lineHeight: 1.5,
-          marginBottom: 16,
-        }}>
-          {sparks[0].affirmation}
-        </div>
-        <div style={{
-          borderTop: `1px solid ${colors.border}`,
-          paddingTop: 16,
+          position: 'relative',
+          zIndex: 1,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: 24,
         }}>
           <div style={{
             fontFamily: fonts.sans,
             fontSize: 11,
-            fontWeight: 600,
-            color: colors.text3,
-            letterSpacing: 1.5,
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: 2,
             textTransform: 'uppercase',
-            marginBottom: 8,
           }}>
-            Today's Exercise
+            Daily Spark
           </div>
-          <div style={{
-            fontFamily: fonts.sans,
-            fontSize: 14,
-            fontWeight: 500,
-            color: colors.text2,
-            lineHeight: 1.5,
-          }}>
-            {sparks[0].exercise}
+
+          <div>
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 20,
+              fontWeight: 700,
+              color: '#FFFFFF',
+              lineHeight: 1.4,
+              marginBottom: 12,
+            }}>
+              {sparks[0].affirmation}
+            </div>
+            <div style={{
+              fontFamily: fonts.sans,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.55)',
+              lineHeight: 1.4,
+            }}>
+              {sparks[0].exercise}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -214,20 +399,24 @@ export default function Home() {
         transition={{ delay: 0.25 }}
         style={{ margin: '16px 16px 0' }}
       >
-        <button style={{
-          width: '100%',
-          padding: '18px 24px',
-          background: '#FFFFFF',
-          color: '#0D0D0D',
-          borderRadius: radius.card,
-          fontFamily: fonts.sans,
-          fontSize: 15,
-          fontWeight: 800,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-        }}>
+        <button
+          onClick={() => setShowRitual(true)}
+          style={{
+            width: '100%',
+            padding: '18px 24px',
+            background: '#FFFFFF',
+            color: '#0D0D0D',
+            border: 'none',
+            borderRadius: radius.card,
+            fontFamily: fonts.sans,
+            fontSize: 15,
+            fontWeight: 800,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+        >
           Before I Walk
         </button>
       </motion.div>
@@ -438,7 +627,7 @@ export default function Home() {
         ))}
       </motion.div>
 
-      {/* Weekly Recap */}
+      {/* Weekly Recap — Corella-specific */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -463,10 +652,10 @@ export default function Home() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {[
-            { label: 'Sessions', value: '5' },
-            { label: 'Minutes', value: '38' },
-            { label: 'Wins Shared', value: '2' },
-            { label: 'Streak', value: '12' },
+            { label: 'Sparks', value: '12' },
+            { label: 'Refreshers', value: '3' },
+            { label: 'Shoots', value: '1' },
+            { label: 'Wins Shared', value: '4' },
           ].map((stat, i) => (
             <div key={i} style={{ textAlign: 'center' }}>
               <div style={{
