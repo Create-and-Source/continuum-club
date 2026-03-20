@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set } from '../store'
+import GuidedFlow from '../components/GuidedFlow'
 
 const filters = ['All', 'Refresher', 'Shoot', 'Content', 'Network', 'Studio']
 
@@ -18,6 +19,9 @@ export default function Events() {
   const [filter, setFilter] = useState('All')
   const [rsvps, setRsvps] = useState(() => get('eventRsvps', {}))
   const [expandedId, setExpandedId] = useState(null)
+  const [showPrep, setShowPrep] = useState(null)
+  const [showRecap, setShowRecap] = useState(null)
+  const [recapsDone, setRecapsDone] = useState(() => get('eventRecaps', {}))
 
   const toggleRsvp = (id) => {
     const next = { ...rsvps, [id]: !rsvps[id] }
@@ -29,6 +33,53 @@ export default function Events() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+      <AnimatePresence>
+        {showPrep && (
+          <GuidedFlow
+            title="Pre-Shoot Prep"
+            bg={P.studio}
+            onClose={() => setShowPrep(null)}
+            onComplete={() => setShowPrep(null)}
+            steps={[
+              { title: 'Wardrobe', instruction: 'Check your outfit. Is it pressed, fitted, and ready? Lay it out now.', seconds: 10 },
+              { title: 'Poses', instruction: 'Practice 3 go-to poses in the mirror. Strong jaw, long neck, soft eyes.', seconds: 15 },
+              { title: 'Breath', instruction: 'Inhale confidence for 4 counts. Hold 4. Exhale doubt for 6.', seconds: 14 },
+              { title: 'Affirmation', instruction: '"The camera loves me because I love myself."', seconds: 8 },
+              { title: 'Ready', instruction: 'You are prepared. You are powerful. Go show them.', seconds: 5 },
+            ]}
+          />
+        )}
+        {showRecap && (
+          <GuidedFlow
+            title="Post-Event Recap"
+            bg={P.crowd}
+            onClose={() => setShowRecap(null)}
+            onComplete={(responses) => {
+              const next = { ...recapsDone, [showRecap]: true }
+              setRecapsDone(next)
+              set('eventRecaps', next)
+              // Save to journal
+              const text = responses.filter(Boolean).join('\n\n')
+              if (text) {
+                const entries = get('journalEntries', [])
+                entries.unshift({
+                  id: Date.now(), date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                  mood: get('todayMood', 'Steady'), type: 'prompted', prompt: 'Event Recap',
+                  text, preview: text.slice(0, 120),
+                })
+                set('journalEntries', entries)
+              }
+              setShowRecap(null)
+            }}
+            steps={[
+              { title: 'Standout Moment', instruction: 'What moment stood out to you?', input: true, placeholder: 'The moment that hit different...' },
+              { title: 'Connection', instruction: 'Who did you connect with?', input: true, placeholder: 'A name, a conversation, a vibe...' },
+              { title: 'Confidence', instruction: 'Rate your confidence at this event. What level were you at?', input: true, placeholder: 'Honestly...' },
+              { title: 'Takeaway', instruction: 'One thing you are carrying forward from this.', input: true, placeholder: 'I learned that...' },
+            ]}
+          />
+        )}
+      </AnimatePresence>
       {/* Hero */}
       <div style={{ position: 'relative', height: 240, overflow: 'hidden' }}>
         <img src={P.crowd} alt="Events" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
@@ -146,19 +197,46 @@ export default function Events() {
                           {evt.type === 'Network' && 'Connect with industry professionals and fellow alumni. Smart casual dress code. Bring business cards if you have them.'}
                           {evt.type === 'Studio' && 'Open studio time for self-led practice. The space is yours — practice walks, poses, or film content.'}
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); toggleRsvp(evt.id) }}
-                          style={{
-                            width: '100%', padding: '12px 0', borderRadius: radius.card, border: 'none',
-                            background: isRsvpd ? 'transparent' : '#FFFFFF',
-                            color: isRsvpd ? colors.text2 : '#0D0D0D',
-                            ...(isRsvpd ? { border: `1px solid ${colors.border}` } : {}),
-                            fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, letterSpacing: 1,
-                            textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s',
-                          }}
-                        >
-                          {isRsvpd ? 'Cancel RSVP' : 'RSVP'}
-                        </button>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleRsvp(evt.id) }}
+                            style={{
+                              flex: 1, padding: '12px 0', borderRadius: radius.card, border: isRsvpd ? `1px solid ${colors.border}` : 'none',
+                              background: isRsvpd ? 'transparent' : '#FFFFFF',
+                              color: isRsvpd ? colors.text2 : '#0D0D0D',
+                              fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, letterSpacing: 1,
+                              textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s',
+                            }}
+                          >
+                            {isRsvpd ? 'Cancel RSVP' : 'RSVP'}
+                          </button>
+                          {isRsvpd && evt.type === 'Shoot' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setShowPrep(evt.id) }}
+                              style={{
+                                padding: '12px 16px', borderRadius: radius.card, border: `1px solid ${colors.border}`,
+                                background: 'transparent', color: colors.text2,
+                                fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 1,
+                                textTransform: 'uppercase', cursor: 'pointer',
+                              }}
+                            >
+                              Prep
+                            </button>
+                          )}
+                          {isRsvpd && !recapsDone[evt.id] && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setShowRecap(evt.id) }}
+                              style={{
+                                padding: '12px 16px', borderRadius: radius.card, border: `1px solid ${colors.border}`,
+                                background: 'transparent', color: colors.text2,
+                                fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 1,
+                                textTransform: 'uppercase', cursor: 'pointer',
+                              }}
+                            >
+                              Recap
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </motion.div>
                   )}

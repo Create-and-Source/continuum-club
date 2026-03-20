@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, clearAll } from '../store'
+import Celebration from '../components/Celebration'
 
 const milestones = [
   { id: 'first_walk', title: 'First Walk', check: () => get('ritualsCompleted', 0) >= 1 },
@@ -15,6 +16,20 @@ const milestones = [
 
 export default function Profile() {
   const navigate = useNavigate()
+  const [unlockedBadge, setUnlockedBadge] = useState(null)
+
+  // Check for newly unlocked badges on mount
+  useState(() => {
+    const seen = get('seenBadges', [])
+    for (const m of milestones) {
+      if (m.check() && !seen.includes(m.id)) {
+        setUnlockedBadge(m)
+        set('seenBadges', [...seen, m.id])
+        break
+      }
+    }
+  })
+
   const [settings, setSettings] = useState(() => get('notifSettings', {
     sparkTime: '7:30 AM',
     eventReminders: '1 day before',
@@ -46,6 +61,23 @@ export default function Profile() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+      <AnimatePresence>
+        {unlockedBadge && (
+          <Celebration
+            title={unlockedBadge.title}
+            subtitle="Badge unlocked"
+            icon={
+              <div style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid #FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            }
+            onDone={() => setUnlockedBadge(null)}
+            duration={3000}
+          />
+        )}
+      </AnimatePresence>
       <div style={{ position: 'relative', height: 280, overflow: 'hidden' }}>
         <img src={P.portrait} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(13,13,13,1) 100%)' }} />

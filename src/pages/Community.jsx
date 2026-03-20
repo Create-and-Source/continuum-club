@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
+import Celebration from '../components/Celebration'
 
 const tabs = ['Wins', 'Seasons', 'News']
 
@@ -32,6 +33,8 @@ export default function Community() {
   const [winText, setWinText] = useState('')
   const [userWins, setUserWins] = useState(() => get('userWins', []))
   const [supported, setSupported] = useState(() => get('supportedWins', {}))
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [celebrationText, setCelebrationText] = useState('')
 
   const handlePostWin = () => {
     if (!winText.trim()) return
@@ -49,6 +52,8 @@ export default function Community() {
     setUserWins(next)
     set('userWins', next)
     increment('winsShared', 4)
+    setCelebrationText(winText.trim())
+    setShowCelebration(true)
     setWinText('')
   }
 
@@ -62,6 +67,20 @@ export default function Community() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+      <AnimatePresence>
+        {showCelebration && (
+          <Celebration
+            title={`"${celebrationText}"`}
+            subtitle="Win shared with the community"
+            icon={
+              <svg width={48} height={48} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+              </svg>
+            }
+            onDone={() => setShowCelebration(false)}
+          />
+        )}
+      </AnimatePresence>
       <div style={{ padding: '56px 20px 0' }}>
         <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1 }}>
           Community

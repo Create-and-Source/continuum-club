@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
+import GuidedFlow from '../components/GuidedFlow'
 
 const moods = ['On Fire', 'Strong', 'Steady', 'Working On It', 'Gentle']
 
@@ -120,6 +121,8 @@ export default function Home() {
   const [mood, setMood] = useState(() => get('todayMood', null))
   const [moodSaved, setMoodSaved] = useState(false)
   const [showRitual, setShowRitual] = useState(false)
+  const [showSparkFlow, setShowSparkFlow] = useState(false)
+  const [showWeeklyCheckin, setShowWeeklyCheckin] = useState(false)
   const [sparkDone, setSparkDone] = useState(() => get('sparkDone', false))
   const [spark] = useState(() => {
     const idx = get('sparkIdx', null)
@@ -149,10 +152,36 @@ export default function Home() {
     setTimeout(() => setMoodSaved(false), 2000)
   }
 
-  const handleSparkDone = () => {
+  const handleSparkDone = (responses) => {
+    setShowSparkFlow(false)
     setSparkDone(true)
     set('sparkDone', true)
     increment('sparksCompleted', 0)
+    // Save reflection to journal if provided
+    const reflection = responses && responses[2]
+    if (reflection) {
+      const entries = get('journalEntries', [])
+      entries.unshift({
+        id: Date.now(), date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        mood: get('todayMood', 'Steady'), type: 'prompted', prompt: spark.affirmation,
+        text: reflection, preview: reflection.slice(0, 120),
+      })
+      set('journalEntries', entries)
+    }
+  }
+
+  const handleWeeklyCheckin = (responses) => {
+    setShowWeeklyCheckin(false)
+    const entries = get('journalEntries', [])
+    const text = responses.filter(Boolean).join('\n\n')
+    if (text) {
+      entries.unshift({
+        id: Date.now(), date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        mood: get('todayMood', 'Steady'), type: 'prompted', prompt: 'Weekly Check-In',
+        text, preview: text.slice(0, 120),
+      })
+      set('journalEntries', entries)
+    }
   }
 
   const handleRitualComplete = () => {
@@ -167,6 +196,33 @@ export default function Home() {
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
       <AnimatePresence>
         {showRitual && <RitualOverlay onClose={handleRitualComplete} />}
+        {showSparkFlow && (
+          <GuidedFlow
+            title="Morning Spark"
+            bg={P.portrait}
+            onClose={() => setShowSparkFlow(false)}
+            onComplete={handleSparkDone}
+            steps={[
+              { title: 'Read Aloud', instruction: spark.affirmation.replace(/"/g, ''), seconds: 8 },
+              { title: 'Exercise', instruction: spark.exercise, seconds: 15 },
+              { title: 'Reflect', instruction: 'What does this spark mean to you right now?', input: true, placeholder: 'One line is enough...' },
+            ]}
+          />
+        )}
+        {showWeeklyCheckin && (
+          <GuidedFlow
+            title="Weekly Check-In"
+            bg={P.studio}
+            onClose={() => setShowWeeklyCheckin(false)}
+            onComplete={handleWeeklyCheckin}
+            steps={[
+              { title: 'Highlight', instruction: 'What was your proudest moment this week?', input: true, placeholder: 'The moment that mattered most...' },
+              { title: 'Growth', instruction: 'Where did you surprise yourself?', input: true, placeholder: 'Something you did differently...' },
+              { title: 'Release', instruction: 'What are you letting go of before next week?', input: true, placeholder: 'Let it go...' },
+              { title: 'Intention', instruction: 'Set one intention for the week ahead.', input: true, placeholder: 'Next week I will...' },
+            ]}
+          />
+        )}
       </AnimatePresence>
 
       {/* Hero */}
@@ -236,11 +292,11 @@ export default function Home() {
               {spark.exercise}
             </div>
             {!sparkDone && (
-              <button onClick={handleSparkDone} style={{
+              <button onClick={() => setShowSparkFlow(true)} style={{
                 padding: '8px 20px', borderRadius: radius.pill, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)',
                 fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: '#FFFFFF', letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
               }}>
-                Mark Complete
+                Begin Spark
               </button>
             )}
           </div>
@@ -385,6 +441,17 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </motion.div>
+
+      {/* Weekly Check-In */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} style={{ margin: '16px 16px 0' }}>
+        <button onClick={() => setShowWeeklyCheckin(true)} style={{
+          width: '100%', padding: '16px 24px', background: colors.surface, border: `1px solid ${colors.border}`,
+          borderRadius: radius.card, fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, letterSpacing: 1.5,
+          textTransform: 'uppercase', color: colors.text2, cursor: 'pointer', transition: 'all 0.2s',
+        }}>
+          Weekly Check-In
+        </button>
       </motion.div>
     </div>
   )
