@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
+import BeforeAfterSlider from '../components/BeforeAfterSlider'
 
 const confidenceData = [
   { month: 'Oct', value: 30 },
@@ -117,102 +118,8 @@ export default function Journey() {
         }}>
           Glow-Up Timeline
         </div>
-        <div style={{
-          display: 'flex',
-          gap: 12,
-        }}>
-          <div style={{
-            flex: 1,
-            borderRadius: radius.card,
-            overflow: 'hidden',
-            position: 'relative',
-            height: 220,
-          }}>
-            <img src={P.t1} alt="Before" style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 40%',
-              filter: 'grayscale(100%) contrast(0.85) brightness(0.9)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: 12,
-              left: 12,
-            }}>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 10,
-                fontWeight: 600,
-                color: colors.text3,
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
-                marginBottom: 2,
-              }}>
-                Day 1
-              </div>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 14,
-                fontWeight: 800,
-                color: colors.text,
-                textTransform: 'uppercase',
-              }}>
-                Before
-              </div>
-            </div>
-          </div>
-          <div style={{
-            flex: 1,
-            borderRadius: radius.card,
-            overflow: 'hidden',
-            position: 'relative',
-            height: 220,
-          }}>
-            <img src={P.t1} alt="After" style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 20%',
-              filter: 'grayscale(100%) contrast(1.15) brightness(1.1)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: 12,
-              left: 12,
-            }}>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 10,
-                fontWeight: 600,
-                color: colors.text3,
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
-                marginBottom: 2,
-              }}>
-                Season 14
-              </div>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 14,
-                fontWeight: 800,
-                color: colors.text,
-                textTransform: 'uppercase',
-              }}>
-                Now
-              </div>
-            </div>
-          </div>
+        <div style={{ borderRadius: radius.card, overflow: 'hidden' }}>
+          <BeforeAfterSlider beforeSrc={P.t1} afterSrc={P.t1} height={220} />
         </div>
       </motion.div>
 

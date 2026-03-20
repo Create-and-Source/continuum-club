@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
+import BeforeAfterSlider from '../components/BeforeAfterSlider'
 
 const shoots = [
   {
@@ -51,110 +52,15 @@ export default function Portfolio() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
-      {/* Hero — Before & After */}
-      <div style={{ position: 'relative', height: 280, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', height: '100%' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
-            <img src={P.t1} alt="Before" style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 40%',
-              filter: 'grayscale(100%) contrast(0.85) brightness(0.9)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(13,13,13,0.8) 100%)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: 16,
-              left: 16,
-            }}>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 10,
-                fontWeight: 600,
-                color: colors.text3,
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
-                marginBottom: 2,
-              }}>Day 1</div>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 18,
-                fontWeight: 900,
-                color: colors.text,
-                textTransform: 'uppercase',
-              }}>Before</div>
-            </div>
-          </div>
-          <div style={{ width: 2, background: colors.bg }} />
-          <div style={{ flex: 1, position: 'relative' }}>
-            <img src={P.t1} alt="Now" style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center 20%',
-              filter: 'grayscale(100%) contrast(1.15) brightness(1.1)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(13,13,13,0.8) 100%)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: 16,
-              right: 16,
-              textAlign: 'right',
-            }}>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 10,
-                fontWeight: 600,
-                color: colors.text3,
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
-                marginBottom: 2,
-              }}>Season 14</div>
-              <div style={{
-                fontFamily: fonts.sans,
-                fontSize: 18,
-                fontWeight: 900,
-                color: colors.text,
-                textTransform: 'uppercase',
-              }}>Now</div>
-            </div>
-          </div>
-        </div>
-        <div style={{
-          position: 'absolute',
-          top: 56,
-          left: 20,
-        }}>
-          <div style={{
-            fontFamily: fonts.sans,
-            fontSize: 28,
-            fontWeight: 900,
-            color: colors.text,
-            textTransform: 'uppercase',
-            letterSpacing: -0.5,
-            lineHeight: 1.1,
-            textShadow: '0 2px 12px rgba(0,0,0,0.6)',
-          }}>
+      {/* Hero — Before & After Slider */}
+      <div style={{ position: 'relative' }}>
+        <BeforeAfterSlider beforeSrc={P.t1} afterSrc={P.t1} height={280} />
+        <div style={{ position: 'absolute', top: 56, left: 20, zIndex: 3, pointerEvents: 'none' }}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>
             Portfolio
           </div>
-          <div style={{
-            fontFamily: fonts.sans,
-            fontSize: 13,
-            fontWeight: 400,
-            color: colors.text2,
-            marginTop: 6,
-            textShadow: '0 1px 8px rgba(0,0,0,0.6)',
-          }}>
-            Your evolving body of work
+          <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, marginTop: 6, textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
+            Drag to compare
           </div>
         </div>
       </div>
