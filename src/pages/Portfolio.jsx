@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 
 const shoots = [
@@ -28,6 +28,26 @@ const shoots = [
 
 export default function Portfolio() {
   const [selectedShoot, setSelectedShoot] = useState(null)
+  const [shared, setShared] = useState(false)
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Brianna Cole — Portfolio',
+      text: 'Check out my Corella & Co portfolio. Season 14 Alumni.',
+      url: window.location.href,
+    }
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`)
+        setShared(true)
+        setTimeout(() => setShared(false), 2000)
+      }
+    } catch {
+      // user cancelled share
+    }
+  }
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
@@ -277,7 +297,7 @@ export default function Portfolio() {
         transition={{ delay: 0.4 }}
         style={{ margin: '8px 16px 0' }}
       >
-        <button style={{
+        <button onClick={handleShare} style={{
           width: '100%',
           padding: '18px 24px',
           background: '#FFFFFF',
@@ -303,7 +323,7 @@ export default function Portfolio() {
             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
           </svg>
-          Share Portfolio
+          {shared ? 'Link Copied' : 'Share Portfolio'}
         </button>
       </motion.div>
     </div>
