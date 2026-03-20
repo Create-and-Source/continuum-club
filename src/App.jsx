@@ -206,11 +206,12 @@ function GuestNav({ onBack }) {
 }
 
 export default function App() {
+  const navigate = useNavigate()
   const [showSplash, setShowSplash] = useState(true)
   const [imgReady, setImgReady] = useState(false)
   const [quote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)])
-  const [userPath, setUserPath] = useState(() => get('userPath', null)) // 'guest' | 'applicant' | 'member'
-  const [userRole, setUserRole] = useState(() => get('userRole', null)) // 'member' | 'mentor' | 'admin'
+  const [userPath, setUserPath] = useState(() => get('userPath', null))
+  const [userRole, setUserRole] = useState(() => get('userRole', null))
   const [showGate, setShowGate] = useState(!userPath)
   const [showRoleSelect, setShowRoleSelect] = useState(false)
 
@@ -232,10 +233,16 @@ export default function App() {
     if (path === 'member') {
       setShowGate(false)
       setShowRoleSelect(true)
-    } else {
-      setUserPath(path)
-      set('userPath', path)
+    } else if (path === 'applicant') {
+      setUserPath('applicant')
+      set('userPath', 'applicant')
       setShowGate(false)
+      navigate('/apply')
+    } else {
+      setUserPath('guest')
+      set('userPath', 'guest')
+      setShowGate(false)
+      navigate('/about')
     }
   }
 
@@ -245,6 +252,9 @@ export default function App() {
     set('userRole', role)
     set('userPath', 'member')
     setShowRoleSelect(false)
+    if (role === 'admin') navigate('/admin')
+    else if (role === 'mentor') navigate('/mentor-portal')
+    else navigate('/')
   }
 
   const handleBackToGate = () => {
@@ -253,6 +263,7 @@ export default function App() {
     set('userPath', null)
     set('userRole', null)
     setShowGate(true)
+    navigate('/')
   }
 
   const isGuest = userPath === 'guest' || userPath === 'applicant'
