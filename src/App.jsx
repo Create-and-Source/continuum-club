@@ -7,6 +7,11 @@ import Practice from './pages/Practice'
 import Events from './pages/Events'
 import Community from './pages/Community'
 import Journey from './pages/Journey'
+import Benefits from './pages/Benefits'
+import Journal from './pages/Journal'
+import Portfolio from './pages/Portfolio'
+import Mentorship from './pages/Mentorship'
+import Profile from './pages/Profile'
 import { fonts, P } from './theme'
 
 const quotes = [
@@ -184,6 +189,11 @@ export default function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/community" element={<Community />} />
         <Route path="/journey" element={<Journey />} />
+        <Route path="/benefits" element={<Benefits />} />
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/mentorship" element={<Mentorship />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <TabBar />
     </div>

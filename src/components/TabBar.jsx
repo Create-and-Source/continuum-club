@@ -6,7 +6,7 @@ const tabs = [
   { path: '/practice', label: 'Practice', icon: PracticeIcon },
   { path: '/events', label: 'Events', icon: EventsIcon },
   { path: '/community', label: 'Community', icon: CommunityIcon },
-  { path: '/journey', label: 'Journey', icon: JourneyIcon },
+  { path: '/profile', label: 'Profile', icon: ProfileIcon },
 ]
 
 export default function TabBar() {
@@ -104,10 +104,11 @@ function CommunityIcon({ color, size }) {
   )
 }
 
-function JourneyIcon({ color, size }) {
+function ProfileIcon({ color, size }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }

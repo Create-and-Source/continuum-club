@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 
@@ -6,7 +7,18 @@ const moods = ['On Fire', 'Strong', 'Steady', 'Working On It', 'Gentle']
 
 const sparks = [
   { affirmation: '"You are not behind. You are exactly where your power needs you to be."', exercise: 'Mirror Talk: 60 seconds of eye contact with yourself. No words. Just presence.' },
+  { affirmation: '"She who walks with intention never arrives by accident."', exercise: 'Power Pose: Stand tall, hands on hips, chin up. Hold for 2 minutes.' },
+  { affirmation: '"Your presence is your power. Stop giving it away."', exercise: 'Eye Contact Drill: Hold eye contact with your reflection for 90 seconds without looking away.' },
+  { affirmation: '"Confidence is built in reps, not in revelations."', exercise: 'Walk Drill: Walk across the room like the entire room is watching. Repeat 5 times.' },
+  { affirmation: '"You were not made to blend in. You were made to stand out."', exercise: 'Voice Exercise: Say your name out loud 3 times — each time louder and more certain.' },
 ]
+
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
 
 const communityWins = [
   { name: 'Jasmine R.', season: 'S14', avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.' },
@@ -177,8 +189,17 @@ function RitualOverlay({ onClose }) {
 }
 
 export default function Home() {
+  const navigate = useNavigate()
   const [mood, setMood] = useState(null)
+  const [moodSaved, setMoodSaved] = useState(false)
   const [showRitual, setShowRitual] = useState(false)
+  const [spark] = useState(() => sparks[Math.floor(Math.random() * sparks.length)])
+
+  const handleMood = (m) => {
+    setMood(m)
+    setMoodSaved(true)
+    setTimeout(() => setMoodSaved(false), 2000)
+  }
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
@@ -219,7 +240,7 @@ export default function Home() {
             textTransform: 'uppercase',
             marginBottom: 6,
           }}>
-            Welcome back
+            {getGreeting()}
           </div>
           <div style={{
             fontFamily: fonts.sans,
@@ -377,7 +398,7 @@ export default function Home() {
               lineHeight: 1.4,
               marginBottom: 12,
             }}>
-              {sparks[0].affirmation}
+              {spark.affirmation}
             </div>
             <div style={{
               fontFamily: fonts.sans,
@@ -386,7 +407,7 @@ export default function Home() {
               color: 'rgba(255,255,255,0.55)',
               lineHeight: 1.4,
             }}>
-              {sparks[0].exercise}
+              {spark.exercise}
             </div>
           </div>
         </div>
@@ -448,7 +469,7 @@ export default function Home() {
           {moods.map(m => (
             <button
               key={m}
-              onClick={() => setMood(m)}
+              onClick={() => handleMood(m)}
               style={{
                 padding: '8px 16px',
                 borderRadius: radius.pill,
@@ -463,6 +484,95 @@ export default function Home() {
               }}
             >
               {m}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Mood Saved Confirmation */}
+      <AnimatePresence>
+        {moodSaved && mood && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            style={{
+              margin: '8px 16px 0',
+              padding: '10px 16px',
+              background: 'rgba(255,255,255,0.06)',
+              borderRadius: radius.card,
+              fontFamily: fonts.sans,
+              fontSize: 12,
+              fontWeight: 500,
+              color: colors.text2,
+              textAlign: 'center',
+            }}
+          >
+            Logged: feeling {mood.toLowerCase()} today
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Quick Links */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.32 }}
+        style={{
+          margin: '24px 16px 0',
+        }}
+      >
+        <div style={{
+          fontFamily: fonts.sans,
+          fontSize: 11,
+          fontWeight: 700,
+          color: colors.text3,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+          marginBottom: 12,
+        }}>
+          Your Space
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10,
+        }}>
+          {[
+            { label: 'Journal', path: '/journal', icon: 'M4 4h16v16H4V4zm2 2v12h12V6H6zm2 3h8m-8 3h6' },
+            { label: 'Portfolio', path: '/portfolio', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+            { label: 'Benefits', path: '/benefits', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+            { label: 'Journey', path: '/journey', icon: 'M22 12l-4-4v3H3v2h15v3l4-4z' },
+            { label: 'Mentorship', path: '/mentorship', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' },
+          ].map((link, i) => (
+            <button
+              key={i}
+              onClick={() => navigate(link.path)}
+              style={{
+                background: colors.surface,
+                borderRadius: radius.card,
+                padding: '16px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                cursor: 'pointer',
+                border: 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.text2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d={link.icon} />
+              </svg>
+              <span style={{
+                fontFamily: fonts.sans,
+                fontSize: 13,
+                fontWeight: 700,
+                color: colors.text,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+              }}>
+                {link.label}
+              </span>
             </button>
           ))}
         </div>
