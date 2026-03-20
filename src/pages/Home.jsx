@@ -8,16 +8,16 @@ import GuidedFlow from '../components/GuidedFlow'
 const moods = ['On Fire', 'Strong', 'Steady', 'Working On It', 'Gentle']
 
 const allSparks = [
-  { affirmation: '"You are not behind. You are exactly where your power needs you to be."', exercise: 'Mirror Talk: 60 seconds of eye contact with yourself. No words. Just presence.' },
-  { affirmation: '"She who walks with intention never arrives by accident."', exercise: 'Power Pose: Stand tall, hands on hips, chin up. Hold for 2 minutes.' },
-  { affirmation: '"Your presence is your power. Stop giving it away."', exercise: 'Eye Contact Drill: Hold eye contact with your reflection for 90 seconds without looking away.' },
-  { affirmation: '"Confidence is built in reps, not in revelations."', exercise: 'Walk Drill: Walk across the room like the entire room is watching. Repeat 5 times.' },
-  { affirmation: '"You were not made to blend in. You were made to stand out."', exercise: 'Voice Exercise: Say your name out loud 3 times — each time louder and more certain.' },
+  { affirmation: '"This school got me through the darkest period of my life and gave me something to dream about."', source: '— Brianna Pettit, S9' },
+  { affirmation: '"This program not only gives you the tools and skills necessary to succeed in the industry, but you are constantly surrounded by mentors who care about you."', source: '— Chris Lopez, S9' },
+  { affirmation: '"Corella & Co was a game-changer for me. Their professional and structured program goes beyond just modeling."', source: '— Esmeralda Sierra, S10' },
+  { affirmation: '"From building my posing confidence to having a family dedicated towards my growth; I cannot begin to thank them for their unconditional support."', source: '— Janny Nguyen, S8' },
+  { affirmation: '"Defining the future of the arts by uplifting our youth and fueling their passions with values, vision and character."', source: '— Corella & Co Mission' },
 ]
 
 const communityWins = [
-  { name: 'Brianna Pettit', season: 'S9', avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.' },
-  { name: 'Emily Acosta', season: 'S9', avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer.' },
+  { name: 'Brianna Pettit', season: 'S9', avatar: P.t1, text: 'This school got me through the darkest period of my life and gave me something to dream about.' },
+  { name: 'Chris Lopez', season: 'S9', avatar: P.t2, text: 'This program not only gives you the tools and skills necessary to succeed in the industry, but you are constantly surrounded by mentors who care about you.' },
 ]
 
 const ritualSteps = [
@@ -203,8 +203,8 @@ export default function Home() {
             onClose={() => setShowSparkFlow(false)}
             onComplete={handleSparkDone}
             steps={[
-              { title: 'Read Aloud', instruction: spark.affirmation.replace(/"/g, ''), seconds: 8 },
-              { title: 'Exercise', instruction: spark.exercise, seconds: 15 },
+              { title: 'Read Aloud', instruction: spark.affirmation.replace(/"/g, ''), seconds: 12 },
+              { title: 'Sit With It', instruction: `Let those words land. ${spark.source}`, seconds: 10 },
               { title: 'Reflect', instruction: 'What does this spark mean to you right now?', input: true, placeholder: 'One line is enough...' },
             ]}
           />
@@ -285,11 +285,11 @@ export default function Home() {
             )}
           </div>
           <div>
-            <div style={{ fontFamily: fonts.sans, fontSize: 20, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, marginBottom: 12 }}>
+            <div style={{ fontFamily: fonts.sans, fontSize: 20, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, marginBottom: 8 }}>
               {spark.affirmation}
             </div>
-            <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.55)', lineHeight: 1.4, marginBottom: sparkDone ? 0 : 12 }}>
-              {spark.exercise}
+            <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, marginBottom: sparkDone ? 0 : 12 }}>
+              {spark.source}
             </div>
             {!sparkDone && (
               <button onClick={() => setShowSparkFlow(true)} style={{

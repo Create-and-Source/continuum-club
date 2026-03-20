@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { colors, fonts, radius, P } from '../theme'
 
 const values = [
-  { title: 'Skill Development', desc: 'Posing, runway walks, and emoting techniques with hands-on workshops' },
-  { title: 'Industry Knowledge', desc: 'Modeling types, industry standards, and market expectations' },
-  { title: 'Personal Development', desc: 'Personal branding, social media presence, and portfolio creation' },
-  { title: 'Community Building', desc: 'A supportive environment emphasizing peer growth and teamwork' },
-  { title: 'Networking', desc: 'Creating and maintaining professional connections for career opportunities' },
-  { title: 'Health & Wellness', desc: 'Physical and mental health as the foundation for success' },
+  { title: 'Personalized Training', desc: 'Hands-on coaching tailored to each student — posing, runway, and presence in front of the camera' },
+  { title: 'Confidence Development', desc: 'Building the mindset behind the model — self-confidence, self-acceptance, and mental health' },
+  { title: 'Curriculum-Based', desc: 'A structured program that educates and develops each student with intention, step by step' },
+  { title: 'Community', desc: 'A supportive environment emphasizing peer growth, teamwork, and lasting connections' },
+  { title: 'Values & Character', desc: 'Fueling passions with values, vision, and character that extend beyond the industry' },
 ]
 
 const testimonials = [
-  { name: 'Brianna Pettit', season: 'S9', quote: 'Corella & Co gave me the confidence to walk into any room and own it.' },
-  { name: 'Emily Acosta', season: 'S9', quote: 'I stopped waiting for permission to be powerful. The runway taught me that.' },
-  { name: 'Jessica Dietmeyer', season: 'Alumni', quote: 'I came in with no experience and left with a portfolio, a community, and belief in myself.' },
+  { name: 'Brianna Pettit', season: 'S9', quote: 'This school got me through the darkest period of my life and gave me something to dream about.' },
+  { name: 'Chris Lopez', season: 'S9', quote: 'This program not only gives you the tools and skills necessary to succeed in the industry, but you are constantly surrounded by mentors who care about you.' },
+  { name: 'Esmeralda Sierra', season: 'S10', quote: 'Corella & Co was a game-changer for me. Their professional and structured program goes beyond just modeling.' },
 ]
 
 export default function About() {
@@ -45,7 +44,7 @@ export default function About() {
           Our Mission
         </div>
         <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7 }}>
-          We are working towards breaking perceptions and standards by creating positive attitudes and confident, skillful models. Our curriculum-based program focuses on educating and developing each student with intention — coaching through self-confidence challenges, promoting balanced mental health, and helping individuals achieve self-acceptance.
+          Defining the future of the arts by uplifting our youth and fueling their passions with values, vision and character. Our curriculum-based program focuses on educating and developing each student with intention — coaching through self-confidence challenges, promoting balanced mental health, and helping individuals achieve self-acceptance.
         </div>
       </motion.div>
 
@@ -57,7 +56,7 @@ export default function About() {
           MODEL Academy
         </div>
         <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7, marginBottom: 16 }}>
-          Our curriculum-based training program for aspiring models. No experience needed — just curiosity and a desire to grow. Step-by-step guidance through a clear curriculum with a team committed to your development, both in front of the camera and beyond.
+          An academy and community built for aspiring models. No experience needed — just curiosity and a desire to grow. Learn the foundations of modeling and the mindset behind it through a clear curriculum, supported by a team committed to helping you grow — both in front of the camera and beyond it.
         </div>
         <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, letterSpacing: 1, textTransform: 'uppercase' }}>
           Now enrolling Season 18
@@ -101,16 +100,16 @@ export default function About() {
           </div>
         ))}
 
-        {/* Industry Quote */}
+        {/* Additional Quote */}
         <div style={{
           background: colors.surface, borderRadius: radius.card, padding: 18, marginBottom: 10,
           border: `1px solid ${colors.border}`,
         }}>
           <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, fontStyle: 'italic', marginBottom: 10 }}>
-            "Corella & Co students consistently show up more prepared, more professional, and more confident than anyone we work with."
+            "From building my posing confidence to having a family dedicated towards my growth; I cannot begin to thank them for their unconditional support."
           </div>
           <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 700, color: colors.text }}>
-            The Collective Media Agency <span style={{ fontWeight: 400, color: colors.text3, marginLeft: 4 }}>· Industry Partner</span>
+            Janny Nguyen <span style={{ fontWeight: 400, color: colors.text3, marginLeft: 4 }}>· S8</span>
           </div>
         </div>
 

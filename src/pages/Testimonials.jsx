@@ -2,22 +2,19 @@ import { motion } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 
 const alumniQuotes = [
-  { name: 'Brianna Pettit', season: 'Season 9', quote: 'Corella & Co gave me the confidence to walk into any room and own it. I learned to carry myself with intention.' },
-  { name: 'Emily Acosta', season: 'Season 9', quote: 'I stopped waiting for permission to be powerful. The runway taught me how to show up fully in every space.' },
-  { name: 'Chris Lopez', season: 'Season 9', quote: 'This program changed more than my walk — it changed how I see myself. The discipline and growth are real.' },
-  { name: 'Prince Kanta', season: 'Alumni', quote: 'Posture changed first. Then confidence. Then how people responded to me. The transformation is physical and mental.' },
-  { name: 'Rahma Majid', season: 'Alumni', quote: 'You do not shrink for anyone. You expand. That is the lesson Corella taught me and I carry it everywhere.' },
-  { name: 'Jessica Dietmeyer', season: 'Alumni', quote: 'I came in with no experience and left with a portfolio, a community, and a belief in myself I never had before.' },
-  { name: 'Paris Woods', season: 'Alumni', quote: 'The people you meet here become your lifelong network. Corella builds models but more importantly builds people.' },
-  { name: 'Amaya Tellez', season: 'Alumni', quote: 'The curriculum is real and the coaches are invested. You will be challenged and you will grow. That is a promise.' },
+  { name: 'Brianna Pettit', season: 'Season 9', quote: 'This school got me through the darkest period of my life and gave me something to dream about.' },
+  { name: 'Chris Lopez', season: 'Season 9', quote: 'This program not only gives you the tools and skills necessary to succeed in the industry, but you are constantly surrounded by mentors who care about you.' },
+  { name: 'Esmeralda Sierra', season: 'Season 10', quote: 'Corella & Co was a game-changer for me. Their professional and structured program goes beyond just modeling.' },
+  { name: 'Janny Nguyen', season: 'Season 8', quote: 'From building my posing confidence to having a family dedicated towards my growth; I cannot begin to thank them for their unconditional support.' },
 ]
 
-const industryQuotes = [
-  {
-    name: 'The Collective Media Agency',
-    role: 'Industry Partner',
-    quote: 'Corella & Co students consistently show up more prepared, more professional, and more confident than anyone we work with. The training speaks for itself.',
-  },
+const alumniByseason = [
+  { season: 10, names: ['Esmeralda Sierra'] },
+  { season: 9, names: ['Brianna Pettit', 'Emily Acosta', 'Chris Lopez'] },
+  { season: 8, names: ['Janny Nguyen', 'Vanessa Flores'] },
+  { season: 7, names: ['Cole Johnson', 'Jaidyn Hamilton', 'Jessica Dietmeyer'] },
+  { season: 3, names: ['Paris Woods'] },
+  { season: 2, names: ['Mickey Albanez', 'Yasmin Flores'] },
 ]
 
 export default function Testimonials() {
@@ -38,7 +35,7 @@ export default function Testimonials() {
         </div>
       </div>
 
-      {/* Alumni Quotes Grid */}
+      {/* Alumni Testimonials */}
       <div style={{ margin: '24px 16px 0' }}>
         <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>
           Alumni Testimonials
@@ -67,25 +64,20 @@ export default function Testimonials() {
         </div>
       </div>
 
-      {/* Industry Partners */}
+      {/* Alumni Directory */}
       <div style={{ margin: '32px 16px 0' }}>
         <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>
-          Industry Partners
+          Alumni by Season
         </div>
-        {industryQuotes.map((q, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} style={{
-            background: colors.surface, borderRadius: radius.card, padding: 24, border: `1px solid ${colors.border}`,
+        {alumniByseason.map((group, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.04 }} style={{
+            background: colors.surface, borderRadius: radius.card, padding: 16, marginBottom: 10,
           }}>
-            <div style={{ fontFamily: fonts.sans, fontSize: 17, fontWeight: 400, color: colors.text2, lineHeight: 1.7, fontStyle: 'italic', marginBottom: 20 }}>
-              "{q.quote}"
+            <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.3, marginBottom: 6 }}>
+              Season {group.season}
             </div>
-            <div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                {q.name}
-              </div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 2 }}>
-                {q.role}
-              </div>
+            <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.6 }}>
+              {group.names.join(' · ')}
             </div>
           </motion.div>
         ))}

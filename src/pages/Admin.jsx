@@ -4,12 +4,12 @@ import { colors, fonts, radius, P } from '../theme'
 import { get, set } from '../store'
 
 const defaultMembers = [
-  { id: 'm1', name: 'Brianna Cole', season: 14, status: 'Active', streak: 12, sessions: 47, avatar: P.t1, mood: 'Strong', mentor: 'Corella' },
-  { id: 'm2', name: 'Emily Acosta', season: 9, status: 'Active', streak: 8, sessions: 38, avatar: P.t2, mood: 'On Fire', mentor: 'Corella' },
+  { id: 'm1', name: 'Brianna Cole', season: 18, status: 'Active', streak: 12, sessions: 47, avatar: P.t1, mood: 'Strong', mentor: 'Corella' },
+  { id: 'm2', name: 'Esmeralda Sierra', season: 10, status: 'Active', streak: 8, sessions: 38, avatar: P.t2, mood: 'On Fire', mentor: 'Corella' },
   { id: 'm3', name: 'Chris Lopez', season: 9, status: 'Active', streak: 22, sessions: 64, avatar: P.t3, mood: 'Steady', mentor: null },
-  { id: 'm4', name: 'Paris Woods', season: 18, status: 'Active', streak: 5, sessions: 12, avatar: P.t4, mood: 'On Fire', mentor: null },
-  { id: 'm5', name: 'Jessica Dietmeyer', season: 9, status: 'Inactive', streak: 0, sessions: 89, avatar: P.t5, mood: 'Gentle', mentor: null },
-  { id: 'm6', name: 'Amaya Tellez', season: 14, status: 'Active', streak: 15, sessions: 41, avatar: P.t1, mood: 'Strong', mentor: 'Corella' },
+  { id: 'm4', name: 'Cole Johnson', season: 7, status: 'Active', streak: 5, sessions: 12, avatar: P.t4, mood: 'On Fire', mentor: null },
+  { id: 'm5', name: 'Janny Nguyen', season: 8, status: 'Inactive', streak: 0, sessions: 89, avatar: P.t5, mood: 'Gentle', mentor: null },
+  { id: 'm6', name: 'Vanessa Flores', season: 8, status: 'Active', streak: 15, sessions: 41, avatar: P.t1, mood: 'Strong', mentor: 'Corella' },
 ]
 
 const defaultEvents = [
@@ -23,9 +23,9 @@ const eventTypes = ['Refresher', 'Shoot', 'Content', 'Network', 'Studio']
 const mentorOptions = ['Corella', 'Alex Rivera', 'None']
 
 const defaultSparks = [
-  '"You are not behind. You are exactly where your power needs you to be."',
-  '"She who walks with intention never arrives by accident."',
-  '"Your presence is your power. Stop giving it away."',
+  '"This school got me through the darkest period of my life and gave me something to dream about." — Brianna Pettit, S9',
+  '"Corella & Co was a game-changer for me. Their professional and structured program goes beyond just modeling." — Esmeralda Sierra, S10',
+  '"From building my posing confidence to having a family dedicated towards my growth; I cannot begin to thank them." — Janny Nguyen, S8',
 ]
 
 const defaultAnnouncements = [

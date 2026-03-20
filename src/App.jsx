@@ -23,11 +23,10 @@ import { colors, fonts, radius, P } from './theme'
 import { get, set } from './store'
 
 const quotes = [
-  { text: 'Corella & Co gave me the confidence to walk into any room and own it.', author: 'Brianna Pettit', season: 'S9' },
-  { text: 'I stopped waiting for permission to be powerful. The runway taught me that.', author: 'Emily Acosta', season: 'S9' },
-  { text: 'This program changed more than my walk — it changed how I see myself.', author: 'Chris Lopez', season: 'S9' },
-  { text: 'Posture changed first. Then everything else followed.', author: 'Prince Kanta', season: 'Alumni' },
-  { text: 'You do not shrink for anyone. You expand.', author: 'Rahma Majid', season: 'Alumni' },
+  { text: 'This school got me through the darkest period of my life and gave me something to dream about.', author: 'Brianna Pettit', season: 'S9' },
+  { text: 'This program not only gives you the tools and skills necessary to succeed in the industry, but you are constantly surrounded by mentors who care about you.', author: 'Chris Lopez', season: 'S9' },
+  { text: 'Corella & Co was a game-changer for me. Their professional and structured program goes beyond just modeling.', author: 'Esmeralda Sierra', season: 'S10' },
+  { text: 'From building my posing confidence to having a family dedicated towards my growth; I cannot begin to thank them for their unconditional support.', author: 'Janny Nguyen', season: 'S8' },
 ]
 
 // Guest pages — no tab bar
