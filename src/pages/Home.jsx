@@ -75,6 +75,16 @@ function RitualOverlay({ onClose }) {
         objectFit: 'cover', filter: 'grayscale(100%) brightness(0.3)',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
+      {/* Exit button */}
+      <button onClick={(e) => { e.stopPropagation(); onClose() }} style={{
+        position: 'absolute', top: 20, right: 20, zIndex: 2, width: 40, height: 40, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
       <div style={{ position: 'relative', zIndex: 1, padding: '0 32px', maxWidth: 430, textAlign: 'center' }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}>
