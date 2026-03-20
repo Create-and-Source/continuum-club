@@ -73,7 +73,7 @@ function RitualOverlay({ onClose }) {
     >
       <img src={P.runway} alt="" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%',
-        objectFit: 'cover', filter: 'grayscale(100%) brightness(0.3)',
+        objectFit: 'cover', objectPosition: 'center top', filter: 'grayscale(100%) brightness(0.3)',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
       {/* Exit button */}

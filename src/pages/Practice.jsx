@@ -73,7 +73,7 @@ function RitualOverlay({ onClose }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
       onClick={advanceStep} style={{ position: 'fixed', inset: 0, zIndex: 9998, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-      <img src={P.runway} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%) brightness(0.3)' }} />
+      <img src={P.runway} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', filter: 'grayscale(100%) brightness(0.3)' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)' }} />
       <button onClick={(e) => { e.stopPropagation(); onClose() }} style={{
         position: 'absolute', top: 20, right: 20, zIndex: 2, width: 40, height: 40, borderRadius: '50%',
