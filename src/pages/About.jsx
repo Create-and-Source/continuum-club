@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { colors, fonts, radius, P } from '../theme'
 
 const values = [
@@ -10,7 +11,15 @@ const values = [
   { title: 'Health & Wellness', desc: 'Physical and mental health as the foundation for success' },
 ]
 
+const testimonials = [
+  { name: 'Brianna Pettit', season: 'S9', quote: 'Corella & Co gave me the confidence to walk into any room and own it.' },
+  { name: 'Emily Acosta', season: 'S9', quote: 'I stopped waiting for permission to be powerful. The runway taught me that.' },
+  { name: 'Jessica Dietmeyer', season: 'Alumni', quote: 'I came in with no experience and left with a portfolio, a community, and belief in myself.' },
+]
+
 export default function About() {
+  const navigate = useNavigate()
+
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
       {/* Hero */}
@@ -74,8 +83,49 @@ export default function About() {
         ))}
       </motion.div>
 
-      {/* Locations */}
+      {/* Testimonials Preview */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} style={{ margin: '24px 16px 0' }}>
+        <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>
+          Alumni Voices
+        </div>
+        {testimonials.map((t, i) => (
+          <div key={i} style={{
+            background: colors.surface, borderRadius: radius.card, padding: 18, marginBottom: 10,
+          }}>
+            <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, fontStyle: 'italic', marginBottom: 10 }}>
+              "{t.quote}"
+            </div>
+            <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 700, color: colors.text }}>
+              {t.name} <span style={{ fontWeight: 400, color: colors.text3, marginLeft: 4 }}>· {t.season}</span>
+            </div>
+          </div>
+        ))}
+
+        {/* Industry Quote */}
+        <div style={{
+          background: colors.surface, borderRadius: radius.card, padding: 18, marginBottom: 10,
+          border: `1px solid ${colors.border}`,
+        }}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, fontStyle: 'italic', marginBottom: 10 }}>
+            "Corella & Co students consistently show up more prepared, more professional, and more confident than anyone we work with."
+          </div>
+          <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 700, color: colors.text }}>
+            The Collective Media Agency <span style={{ fontWeight: 400, color: colors.text3, marginLeft: 4 }}>· Industry Partner</span>
+          </div>
+        </div>
+
+        <button onClick={() => navigate('/testimonials')} style={{
+          width: '100%', padding: '14px 0', borderRadius: radius.card,
+          border: `1px solid ${colors.border}`, background: 'transparent',
+          fontFamily: fonts.sans, fontSize: 12, fontWeight: 700, color: colors.text2,
+          letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer', marginTop: 4,
+        }}>
+          Read More Stories
+        </button>
+      </motion.div>
+
+      {/* Locations */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} style={{ margin: '24px 16px 0' }}>
         <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>
           Locations
         </div>

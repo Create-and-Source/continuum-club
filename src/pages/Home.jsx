@@ -16,8 +16,8 @@ const allSparks = [
 ]
 
 const communityWins = [
-  { name: 'Jasmine R.', season: 'S14', avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.' },
-  { name: 'Destiny M.', season: 'S12', avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer.' },
+  { name: 'Brianna Pettit', season: 'S9', avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.' },
+  { name: 'Emily Acosta', season: 'S9', avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer.' },
 ]
 
 const ritualSteps = [

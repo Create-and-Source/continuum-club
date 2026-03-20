@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import TabBar from './components/TabBar'
+import Sidebar from './components/Sidebar'
 import Home from './pages/Home'
 import Practice from './pages/Practice'
 import Events from './pages/Events'
@@ -17,19 +18,20 @@ import Apply from './pages/Apply'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import MentorPortal from './pages/MentorPortal'
+import Testimonials from './pages/Testimonials'
 import { colors, fonts, radius, P } from './theme'
 import { get, set } from './store'
 
 const quotes = [
-  { text: 'Confidence is not a feeling. It is a decision.', author: 'Jasmine R.', season: 'S14' },
-  { text: 'The runway taught me how to walk into any room.', author: 'Destiny M.', season: 'S12' },
-  { text: 'I stopped waiting for permission to be powerful.', author: 'Nia K.', season: 'S11' },
-  { text: 'Posture changed first. Then everything else followed.', author: 'Aria T.', season: 'S13' },
-  { text: 'You do not shrink for anyone. You expand.', author: 'Zara L.', season: 'S10' },
+  { text: 'Corella & Co gave me the confidence to walk into any room and own it.', author: 'Brianna Pettit', season: 'S9' },
+  { text: 'I stopped waiting for permission to be powerful. The runway taught me that.', author: 'Emily Acosta', season: 'S9' },
+  { text: 'This program changed more than my walk — it changed how I see myself.', author: 'Chris Lopez', season: 'S9' },
+  { text: 'Posture changed first. Then everything else followed.', author: 'Prince Kanta', season: 'Alumni' },
+  { text: 'You do not shrink for anyone. You expand.', author: 'Rahma Majid', season: 'Alumni' },
 ]
 
 // Guest pages — no tab bar
-const guestPaths = ['/about', '/contact', '/apply']
+const guestPaths = ['/about', '/contact', '/apply', '/testimonials']
 
 function GateScreen({ onSelect }) {
   return (
@@ -169,12 +171,13 @@ function GuestNav({ onBack }) {
 
   const links = [
     { path: '/about', label: 'About' },
+    { path: '/testimonials', label: 'Stories' },
     { path: '/apply', label: 'Apply' },
     { path: '/contact', label: 'Contact' },
   ]
 
   return (
-    <nav style={{
+    <nav className="cc-guest-tabbar" style={{
       position: 'absolute', bottom: 0, left: 0, right: 0,
       background: 'rgba(13,13,13,0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
       borderTop: `1px solid ${colors.border}`, display: 'flex', justifyContent: 'space-around', alignItems: 'center',
@@ -271,90 +274,100 @@ export default function App() {
   const isGuest = userPath === 'guest' || userPath === 'applicant'
   const isMember = userPath === 'member'
   const showMemberTabBar = isMember && !showGate && !showRoleSelect && !showSplash
+  const showNav = (isGuest || isMember) && !showGate && !showRoleSelect && !showSplash
 
   return (
-    <div style={{
-      maxWidth: 430, margin: '0 auto', height: '100dvh', position: 'relative',
-      overflowX: 'hidden', overflowY: 'auto', background: '#0D0D0D',
-    }}>
-      {/* Splash */}
-      <AnimatePresence>
-        {showSplash && (
-          <motion.div key="splash" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}
-            onClick={() => setShowSplash(false)}
-            style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', background: '#000000',
-            }}
-          >
-            {imgReady && (
-              <img src={P.hero} alt="" style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                objectFit: 'cover', filter: 'grayscale(100%) brightness(0.35)',
-              }} />
-            )}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.45)' }} />
-            {imgReady && (
-              <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 32px', maxWidth: 430 }}>
-                <img src={P.logo} alt="Corella & Co" style={{ height: 40, marginBottom: 48, opacity: 0.9 }} />
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.8 }}
-                  style={{ fontFamily: fonts.sans, fontSize: 22, fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', textAlign: 'center', letterSpacing: 1, lineHeight: 1.35, marginBottom: 20 }}>
-                  "{quote.text}"
-                </motion.div>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.6 }}
-                  style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 60 }}>
-                  {quote.author} — {quote.season}
-                </motion.div>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.5, 0.5] }} transition={{ delay: 1.5, duration: 1.5 }}
-                  style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', letterSpacing: 3, textTransform: 'uppercase' }}>
-                  Tap to enter
-                </motion.div>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div style={{ display: 'flex', minHeight: '100dvh' }}>
+      {/* Desktop Sidebar */}
+      {showNav && (
+        <Sidebar userPath={userPath} userRole={userRole} onBack={handleBackToGate} />
+      )}
 
-      {/* Gate Screen */}
-      <AnimatePresence>
-        {!showSplash && showGate && <GateScreen onSelect={handleGateSelect} />}
-      </AnimatePresence>
+      {/* Main content area */}
+      <div className="cc-app-shell" style={{
+        flex: 1, height: '100dvh', position: 'relative',
+        overflowX: 'hidden', overflowY: 'auto', background: '#0D0D0D',
+      }}>
+        {/* Splash */}
+        <AnimatePresence>
+          {showSplash && (
+            <motion.div key="splash" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}
+              onClick={() => setShowSplash(false)}
+              style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', background: '#000000',
+              }}
+            >
+              {imgReady && (
+                <img src={P.hero} alt="" style={{
+                  position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                  objectFit: 'cover', filter: 'grayscale(100%) brightness(0.35)',
+                }} />
+              )}
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.45)' }} />
+              {imgReady && (
+                <div className="cc-overlay-center" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 32px', maxWidth: 540 }}>
+                  <img src={P.logo} alt="Corella & Co" style={{ height: 40, marginBottom: 48, opacity: 0.9 }} />
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.8 }}
+                    style={{ fontFamily: fonts.sans, fontSize: 22, fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', textAlign: 'center', letterSpacing: 1, lineHeight: 1.35, marginBottom: 20 }}>
+                    "{quote.text}"
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.6 }}
+                    style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 60 }}>
+                    {quote.author} — {quote.season}
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0, 0.5, 0.5] }} transition={{ delay: 1.5, duration: 1.5 }}
+                    style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', letterSpacing: 3, textTransform: 'uppercase' }}>
+                    Tap to enter
+                  </motion.div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Role Select Screen */}
-      <AnimatePresence>
-        {!showSplash && showRoleSelect && <RoleScreen onSelect={handleRoleSelect} />}
-      </AnimatePresence>
+        {/* Gate Screen */}
+        <AnimatePresence>
+          {!showSplash && showGate && <GateScreen onSelect={handleGateSelect} />}
+        </AnimatePresence>
 
-      {/* Routes */}
-      <Routes>
-        {/* Guest / Applicant pages */}
-        <Route path="/about" element={<About />} />
-        <Route path="/apply" element={<Apply />} />
-        <Route path="/contact" element={<Contact />} />
+        {/* Role Select Screen */}
+        <AnimatePresence>
+          {!showSplash && showRoleSelect && <RoleScreen onSelect={handleRoleSelect} />}
+        </AnimatePresence>
 
-        {/* Member pages */}
-        <Route path="/" element={
-          userRole === 'admin' ? <Admin /> :
-          userRole === 'mentor' ? <MentorPortal /> :
-          <Home />
-        } />
-        <Route path="/practice" element={<Practice />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/journey" element={<Journey />} />
-        <Route path="/benefits" element={<Benefits />} />
-        <Route path="/journal" element={<Journal />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/mentorship" element={<Mentorship />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/mentor-portal" element={<MentorPortal />} />
-      </Routes>
+        {/* Routes */}
+        <Routes>
+          {/* Guest / Applicant pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/apply" element={<Apply />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/testimonials" element={<Testimonials />} />
 
-      {/* Navigation */}
-      {showMemberTabBar && <TabBar />}
-      {isGuest && !showGate && <GuestNav onBack={handleBackToGate} />}
+          {/* Member pages */}
+          <Route path="/" element={
+            userRole === 'admin' ? <Admin /> :
+            userRole === 'mentor' ? <MentorPortal /> :
+            <Home />
+          } />
+          <Route path="/practice" element={<Practice />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/journey" element={<Journey />} />
+          <Route path="/benefits" element={<Benefits />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/mentorship" element={<Mentorship />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/mentor-portal" element={<MentorPortal />} />
+        </Routes>
+
+        {/* Navigation */}
+        {showMemberTabBar && <TabBar />}
+        {isGuest && !showGate && <GuestNav onBack={handleBackToGate} />}
+      </div>
     </div>
   )
 }

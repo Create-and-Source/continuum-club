@@ -7,37 +7,37 @@ const categories = [
   {
     title: 'Runway & Posing', icon: '◆',
     sessions: [
-      { id: 'rp1', title: 'Power Walk Fundamentals', duration: '8 min', level: 'Foundation' },
-      { id: 'rp2', title: 'Editorial Posing Flow', duration: '12 min', level: 'Intermediate' },
-      { id: 'rp3', title: 'Heel Confidence Drill', duration: '6 min', level: 'Foundation' },
-      { id: 'rp4', title: 'Runway Presence Masterclass', duration: '15 min', level: 'Advanced' },
+      { id: 'rp1', title: 'Power Walk Fundamentals', duration: '8 min', level: 'Foundation', thumb: P.runway },
+      { id: 'rp2', title: 'Editorial Posing Flow', duration: '12 min', level: 'Intermediate', thumb: P.portrait },
+      { id: 'rp3', title: 'Heel Confidence Drill', duration: '6 min', level: 'Foundation', thumb: P.training },
+      { id: 'rp4', title: 'Runway Presence Masterclass', duration: '15 min', level: 'Advanced', thumb: P.event },
     ],
   },
   {
     title: 'Confidence', icon: '●',
     sessions: [
-      { id: 'c1', title: 'Mirror Talk Practice', duration: '5 min', level: 'Foundation' },
-      { id: 'c2', title: 'Room Entry Energy', duration: '10 min', level: 'Intermediate' },
-      { id: 'c3', title: 'Vocal Projection Lab', duration: '8 min', level: 'Foundation' },
-      { id: 'c4', title: 'Stage Fright Reset', duration: '12 min', level: 'Advanced' },
+      { id: 'c1', title: 'Mirror Talk Practice', duration: '5 min', level: 'Foundation', thumb: P.portrait },
+      { id: 'c2', title: 'Room Entry Energy', duration: '10 min', level: 'Intermediate', thumb: P.crowd },
+      { id: 'c3', title: 'Vocal Projection Lab', duration: '8 min', level: 'Foundation', thumb: P.studio },
+      { id: 'c4', title: 'Stage Fright Reset', duration: '12 min', level: 'Advanced', thumb: P.event },
     ],
   },
   {
     title: 'Breathing', icon: '○',
     sessions: [
-      { id: 'b1', title: 'Pre-Runway Calm', duration: '4 min', level: 'Foundation' },
-      { id: 'b2', title: 'Grounding Breath', duration: '6 min', level: 'Foundation' },
-      { id: 'b3', title: 'Box Breathing for Focus', duration: '5 min', level: 'Intermediate' },
-      { id: 'b4', title: 'Performance Anxiety Release', duration: '10 min', level: 'Advanced' },
+      { id: 'b1', title: 'Pre-Runway Calm', duration: '4 min', level: 'Foundation', thumb: P.studio },
+      { id: 'b2', title: 'Grounding Breath', duration: '6 min', level: 'Foundation', thumb: P.community },
+      { id: 'b3', title: 'Box Breathing for Focus', duration: '5 min', level: 'Intermediate', thumb: P.training },
+      { id: 'b4', title: 'Performance Anxiety Release', duration: '10 min', level: 'Advanced', thumb: P.portrait },
     ],
   },
   {
     title: 'Communication', icon: '▪',
     sessions: [
-      { id: 'cm1', title: 'Elevator Pitch Practice', duration: '7 min', level: 'Foundation' },
-      { id: 'cm2', title: 'Casting Call Confidence', duration: '10 min', level: 'Intermediate' },
-      { id: 'cm3', title: 'Networking Conversation Flow', duration: '8 min', level: 'Foundation' },
-      { id: 'cm4', title: 'Interview Presence', duration: '12 min', level: 'Advanced' },
+      { id: 'cm1', title: 'Elevator Pitch Practice', duration: '7 min', level: 'Foundation', thumb: P.crowd },
+      { id: 'cm2', title: 'Casting Call Confidence', duration: '10 min', level: 'Intermediate', thumb: P.runway },
+      { id: 'cm3', title: 'Networking Conversation Flow', duration: '8 min', level: 'Foundation', thumb: P.event },
+      { id: 'cm4', title: 'Interview Presence', duration: '12 min', level: 'Advanced', thumb: P.studio },
     ],
   },
 ]
@@ -84,7 +84,7 @@ function RitualOverlay({ onClose }) {
           <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>
-      <div style={{ position: 'relative', zIndex: 1, padding: '0 32px', maxWidth: 430, textAlign: 'center' }}>
+      <div className="cc-overlay-center" style={{ position: 'relative', zIndex: 1, padding: '0 32px', maxWidth: 540, textAlign: 'center' }}>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}>
             <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 16 }}>Step {step + 1} of {ritualSteps.length}</div>
@@ -97,6 +97,138 @@ function RitualOverlay({ onClose }) {
           {ritualSteps.map((_, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: i <= step ? '#FFFFFF' : 'rgba(255,255,255,0.2)' }} />)}
         </div>
         <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.25)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 32 }}>Tap to skip</div>
+      </div>
+    </motion.div>
+  )
+}
+
+// Video Placeholder Player
+function VideoPlayer({ session, onClose, onComplete }) {
+  const [playing, setPlaying] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
+  const durationSec = parseInt(session.duration) * 60
+
+  useEffect(() => {
+    if (!playing) return
+    if (elapsed >= durationSec) { setPlaying(false); return }
+    const t = setInterval(() => setElapsed(e => e + 1), 1000)
+    return () => clearInterval(t)
+  }, [playing, elapsed, durationSec])
+
+  const pct = Math.min((elapsed / durationSec) * 100, 100)
+  const mins = Math.floor(elapsed / 60)
+  const secs = elapsed % 60
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9997, background: '#000', display: 'flex', flexDirection: 'column' }}>
+      {/* Video area with thumbnail */}
+      <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <img src={session.thumb} alt="" style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          objectFit: 'cover', filter: `grayscale(100%) brightness(${playing ? 0.25 : 0.35})`,
+          transition: 'filter 0.5s',
+        }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
+
+        {/* Close button */}
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 16, right: 16, zIndex: 2, width: 40, height: 40, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        {/* Center content */}
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 32px' }}>
+          {!playing && elapsed === 0 && (
+            <>
+              <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+                Video Coming Soon
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 24, fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+                {session.title}
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginBottom: 32 }}>
+                {session.duration} · {session.level}
+              </div>
+              {/* Play button */}
+              <button onClick={() => setPlaying(true)} style={{
+                width: 72, height: 72, borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+                border: '2px solid rgba(255,255,255,0.5)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width={28} height={28} viewBox="0 0 24 24" fill="white"><polygon points="6 3 20 12 6 21 6 3" /></svg>
+              </button>
+            </>
+          )}
+
+          {playing && (
+            <>
+              <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+                Session In Progress
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 20, fontWeight: 800, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: 12 }}>
+                {session.title}
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 48, fontWeight: 900, color: '#FFFFFF', lineHeight: 1, marginBottom: 24 }}>
+                {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+              </div>
+              <button onClick={() => setPlaying(false)} style={{
+                width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+                border: '2px solid rgba(255,255,255,0.4)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <div style={{ width: 4, height: 18, background: '#FFFFFF', borderRadius: 2 }} />
+                  <div style={{ width: 4, height: 18, background: '#FFFFFF', borderRadius: 2 }} />
+                </div>
+              </button>
+            </>
+          )}
+
+          {!playing && elapsed > 0 && (
+            <>
+              <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+                Session Paused
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 20, fontWeight: 800, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: 12 }}>
+                {session.title}
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 48, fontWeight: 900, color: '#FFFFFF', lineHeight: 1, marginBottom: 24 }}>
+                {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+              </div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button onClick={() => setPlaying(true)} style={{
+                  padding: '12px 28px', borderRadius: radius.pill, background: '#FFFFFF', border: 'none',
+                  fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: '#0D0D0D', letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+                }}>Resume</button>
+                <button onClick={() => onComplete(session.id)} style={{
+                  padding: '12px 28px', borderRadius: radius.pill, border: '1px solid rgba(255,255,255,0.3)', background: 'transparent',
+                  fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text2, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+                }}>Complete</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Progress bar at bottom */}
+      <div style={{ padding: '12px 20px 24px', background: '#000' }}>
+        <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: '#FFFFFF', borderRadius: 2, transition: 'width 0.5s linear' }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+          <span style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.3)' }}>
+            {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
+          </span>
+          <span style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.3)' }}>
+            {session.duration}
+          </span>
+        </div>
       </div>
     </motion.div>
   )
@@ -125,35 +257,12 @@ export default function Practice() {
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
       <AnimatePresence>
         {showRitual && <RitualOverlay onClose={handleRitualComplete} />}
-      </AnimatePresence>
-
-      {/* Session Player Overlay */}
-      <AnimatePresence>
         {activeSession && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, zIndex: 9997, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ padding: '0 32px', maxWidth: 430, textAlign: 'center' }}>
-              <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
-                Now Playing
-              </div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 24, fontWeight: 900, color: '#FFFFFF', textTransform: 'uppercase', marginBottom: 8 }}>
-                {activeSession.title}
-              </div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, marginBottom: 32 }}>
-                {activeSession.duration} · {activeSession.level}
-              </div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-                <button onClick={() => setActiveSession(null)} style={{
-                  padding: '12px 24px', borderRadius: radius.pill, border: `1px solid ${colors.border}`, background: 'transparent',
-                  fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text2, letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
-                }}>Close</button>
-                <button onClick={() => markComplete(activeSession.id)} style={{
-                  padding: '12px 24px', borderRadius: radius.pill, background: '#FFFFFF', border: 'none',
-                  fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: '#0D0D0D', letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
-                }}>Complete</button>
-              </div>
-            </div>
-          </motion.div>
+          <VideoPlayer
+            session={activeSession}
+            onClose={() => setActiveSession(null)}
+            onComplete={markComplete}
+          />
         )}
       </AnimatePresence>
 
@@ -225,7 +334,7 @@ export default function Practice() {
         <div style={{ margin: '0 16px 14px', fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase' }}>
           Studio Playlists
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 16px' }}>
+        <div className="cc-content-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 16px' }}>
           {playlists.map((pl, i) => (
             <div key={i} style={{ position: 'relative', borderRadius: radius.card, overflow: 'hidden', height: 140 }}>
               <img src={pl.image} alt={pl.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />

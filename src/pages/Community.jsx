@@ -7,15 +7,15 @@ import Celebration from '../components/Celebration'
 const tabs = ['Wins', 'Seasons', 'News']
 
 const defaultWins = [
-  { id: 'w1', name: 'Jasmine R.', season: 14, avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.', supports: 24, replies: 6, time: '2h ago' },
-  { id: 'w2', name: 'Destiny M.', season: 12, avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer on the spot.', supports: 31, replies: 8, time: '5h ago' },
-  { id: 'w3', name: 'Aaliyah K.', season: 18, avatar: P.t3, text: 'Performed my first spoken word piece in front of 200 people. Hands were shaking but my voice was not.', supports: 45, replies: 12, time: '8h ago' },
-  { id: 'w4', name: 'Sofia L.', season: 9, avatar: P.t4, text: 'Three years post-Corella and I still do my Before I Walk every single morning. It changed everything.', supports: 58, replies: 14, time: '1d ago' },
-  { id: 'w5', name: 'Nyla T.', season: 14, avatar: P.t5, text: "Started teaching confidence workshops at my daughter's school. Full circle moment.", supports: 39, replies: 9, time: '1d ago' },
+  { id: 'w1', name: 'Brianna Pettit', season: 9, avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.', supports: 24, replies: 6, time: '2h ago' },
+  { id: 'w2', name: 'Emily Acosta', season: 9, avatar: P.t2, text: 'Walked into my interview with runway posture and spoke like I meant it. Got the offer on the spot.', supports: 31, replies: 8, time: '5h ago' },
+  { id: 'w3', name: 'Paris Woods', season: 18, avatar: P.t3, text: 'Performed my first spoken word piece in front of 200 people. Hands were shaking but my voice was not.', supports: 45, replies: 12, time: '8h ago' },
+  { id: 'w4', name: 'Jessica Dietmeyer', season: 9, avatar: P.t4, text: 'Three years post-Corella and I still do my Before I Walk every single morning. It changed everything.', supports: 58, replies: 14, time: '1d ago' },
+  { id: 'w5', name: 'Amaya Tellez', season: 14, avatar: P.t5, text: "Started teaching confidence workshops at my daughter's school. Full circle moment.", supports: 39, replies: 9, time: '1d ago' },
 ]
 
 const seasons = [
-  { number: 18, title: 'Current Season', members: 12, image: P.crowd, status: 'Active' },
+  { number: 18, title: 'Season 18 — Current', members: 12, image: P.crowd, status: 'Active' },
   { number: 14, title: 'Spring 2025', members: 15, image: P.runway, status: 'Alumni' },
   { number: 12, title: 'Fall 2024', members: 14, image: P.training, status: 'Alumni' },
   { number: 9, title: 'Spring 2024', members: 16, image: P.event, status: 'Alumni' },

@@ -14,7 +14,7 @@ export default function TabBar() {
   const navigate = useNavigate()
 
   return (
-    <nav style={{
+    <nav className="cc-tabbar" style={{
       position: 'absolute',
       bottom: 0,
       left: 0,

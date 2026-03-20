@@ -6,7 +6,7 @@ import GuidedFlow from '../components/GuidedFlow'
 
 const filters = ['All', 'Refresher', 'Shoot', 'Content', 'Network', 'Studio']
 
-const eventData = [
+const defaultEventData = [
   { id: 'e1', type: 'Refresher', title: 'Posture & Presence Lab', date: 'Apr 12, 2026', daysAway: 5, totalSpots: 12, attendees: [P.t1, P.t2, P.t3], image: P.event },
   { id: 'e2', type: 'Shoot', title: 'Headshot Marathon', date: 'Apr 19, 2026', daysAway: 12, totalSpots: 8, attendees: [P.t4, P.t5], image: P.studio },
   { id: 'e3', type: 'Content', title: 'Reel Creation Workshop', date: 'Apr 26, 2026', daysAway: 19, totalSpots: 16, attendees: [P.t1, P.t3, P.t5, P.t2], image: P.training },
@@ -15,6 +15,41 @@ const eventData = [
   { id: 'e6', type: 'Studio', title: 'Open Floor: Free Practice', date: 'May 17, 2026', daysAway: 40, totalSpots: 18, attendees: [P.t2], image: P.runway },
 ]
 
+function generateICS(evt) {
+  // Parse the event date
+  const dateStr = evt.date.replace(',', '')
+  const eventDate = new Date(dateStr)
+  const year = eventDate.getFullYear()
+  const month = String(eventDate.getMonth() + 1).padStart(2, '0')
+  const day = String(eventDate.getDate()).padStart(2, '0')
+  const dtStart = `${year}${month}${day}T170000`
+  const dtEnd = `${year}${month}${day}T190000`
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Continuum Club//Events//EN',
+    'BEGIN:VEVENT',
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${evt.title}`,
+    'LOCATION:4235 N Marshall Way\\, Suite 200\\, Scottsdale\\, AZ 85251',
+    `DESCRIPTION:Corella & Co - ${evt.type} Event`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n')
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${evt.title.replace(/[^a-zA-Z0-9]/g, '_')}.ics`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 export default function Events() {
   const [filter, setFilter] = useState('All')
   const [rsvps, setRsvps] = useState(() => get('eventRsvps', {}))
@@ -22,6 +57,10 @@ export default function Events() {
   const [showPrep, setShowPrep] = useState(null)
   const [showRecap, setShowRecap] = useState(null)
   const [recapsDone, setRecapsDone] = useState(() => get('eventRecaps', {}))
+
+  // Merge admin-created events
+  const customEvents = get('customEvents', [])
+  const eventData = [...defaultEventData, ...customEvents.filter(e => e.visible !== false)]
 
   const toggleRsvp = (id) => {
     const next = { ...rsvps, [id]: !rsvps[id] }
@@ -58,7 +97,6 @@ export default function Events() {
               const next = { ...recapsDone, [showRecap]: true }
               setRecapsDone(next)
               set('eventRecaps', next)
-              // Save to journal
               const text = responses.filter(Boolean).join('\n\n')
               if (text) {
                 const entries = get('journalEntries', [])
@@ -111,10 +149,11 @@ export default function Events() {
       </div>
 
       {/* Event Cards */}
-      <div style={{ margin: '8px 0 0' }}>
+      <div className="cc-event-cards" style={{ margin: '8px 0 0' }}>
         {filtered.map((evt, i) => {
           const isRsvpd = rsvps[evt.id]
-          const spots = evt.totalSpots - evt.attendees.length - (isRsvpd ? 1 : 0)
+          const attendeeCount = evt.attendees ? evt.attendees.length : 0
+          const spots = evt.totalSpots - attendeeCount - (isRsvpd ? 1 : 0)
           const expanded = expandedId === evt.id
 
           return (
@@ -127,7 +166,7 @@ export default function Events() {
               onClick={() => setExpandedId(expanded ? null : evt.id)}
             >
               <div style={{ position: 'relative', height: 140 }}>
-                <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                <img src={evt.image || P.event} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%)' }} />
                 <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff' }} />
@@ -152,12 +191,12 @@ export default function Events() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2 }}>
-                    {evt.date} · {evt.daysAway} days away
+                    {evt.date} {evt.daysAway ? `· ${evt.daysAway} days away` : ''}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {evt.attendees.slice(0, 3).map((a, ai) => (
+                    {(evt.attendees || []).slice(0, 3).map((a, ai) => (
                       <div key={ai} style={{
                         width: 28, height: 28, borderRadius: '50%', overflow: 'hidden',
                         border: `2px solid ${colors.surface}`, marginLeft: ai === 0 ? 0 : -8,
@@ -197,7 +236,7 @@ export default function Events() {
                           {evt.type === 'Network' && 'Connect with industry professionals and fellow alumni. Smart casual dress code. Bring business cards if you have them.'}
                           {evt.type === 'Studio' && 'Open studio time for self-led practice. The space is yours — practice walks, poses, or film content.'}
                         </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleRsvp(evt.id) }}
                             style={{
@@ -210,6 +249,26 @@ export default function Events() {
                           >
                             {isRsvpd ? 'Cancel RSVP' : 'RSVP'}
                           </button>
+                          {isRsvpd && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); generateICS(evt) }}
+                              style={{
+                                padding: '12px 16px', borderRadius: radius.card, border: `1px solid ${colors.border}`,
+                                background: 'transparent', color: colors.text2,
+                                fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 1,
+                                textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                              }}
+                            >
+                              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                                <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+                              </svg>
+                              Calendar
+                            </button>
+                          )}
                           {isRsvpd && evt.type === 'Shoot' && (
                             <button
                               onClick={(e) => { e.stopPropagation(); setShowPrep(evt.id) }}

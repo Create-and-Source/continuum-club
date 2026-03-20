@@ -70,6 +70,7 @@ const steps = [
   },
   {
     type: 'choice',
+    key: 'location',
     question: 'Where are you located?',
     required: true,
     options: ['Arizona', 'Out of state'],
@@ -98,6 +99,7 @@ const steps = [
   },
   {
     type: 'choice',
+    key: 'mindset',
     question: 'Which best describes your current mindset?',
     required: true,
     options: [
@@ -116,11 +118,8 @@ const steps = [
       { key: 'instagram', label: 'Instagram (optional)', placeholder: '@yourhandle' },
     ],
   },
-  {
-    type: 'complete',
-    title: "You're In the Running!",
-    desc: "Thanks for applying to Corella & Co's Model Development Program. We'll review your application and reach out to schedule your in-person interview.",
-  },
+  // Placeholder for dynamic completion — rendered conditionally below
+  { type: 'complete' },
 ]
 
 export default function Apply() {
@@ -129,6 +128,8 @@ export default function Apply() {
   const [selected, setSelected] = useState(null)
   const [multiSelected, setMultiSelected] = useState([])
   const [fields, setFields] = useState({})
+  const [locationAnswer, setLocationAnswer] = useState(null)
+  const [mindsetAnswer, setMindsetAnswer] = useState(null)
 
   const current = steps[step]
   const total = steps.length
@@ -146,6 +147,8 @@ export default function Apply() {
     const newAnswers = { ...answers }
     if (current.type === 'choice') {
       newAnswers[step] = selected
+      if (current.key === 'location') setLocationAnswer(selected)
+      if (current.key === 'mindset') setMindsetAnswer(selected)
       setSelected(null)
     } else if (current.type === 'multi') {
       newAnswers[step] = multiSelected
@@ -157,6 +160,7 @@ export default function Apply() {
       apps.push({
         ...fields,
         answers: newAnswers,
+        location: locationAnswer,
         date: new Date().toISOString(),
         status: 'Pending',
       })
@@ -175,6 +179,10 @@ export default function Apply() {
 
   // Progress (skip welcome and complete)
   const progressPct = Math.min(((step) / (total - 1)) * 100, 100)
+
+  // Determine completion variant
+  const isArizona = locationAnswer === 'Arizona'
+  const isUndecided = mindsetAnswer === "I'm curious but still figuring things out"
 
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120, position: 'relative' }}>
@@ -353,22 +361,90 @@ export default function Apply() {
             </div>
           )}
 
-          {/* Complete */}
+          {/* Branching Completion */}
           {current.type === 'complete' && (
             <div style={{ padding: '0', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ padding: '0 32px', textAlign: 'center' }}>
-                <svg width={56} height={56} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 24 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5, lineHeight: 1.2, marginBottom: 16 }}>
-                  {current.title}
-                </div>
-                <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7 }}>
-                  {current.desc}
-                </div>
-                <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text3, marginTop: 24, letterSpacing: 1, textTransform: 'uppercase' }}>
-                  Season 18 — Now Enrolling
-                </div>
+              <div className="cc-overlay-center" style={{ padding: '0 32px', textAlign: 'center', maxWidth: 540 }}>
+                {isArizona ? (
+                  <>
+                    {/* Arizona — You're In! */}
+                    <svg width={56} height={56} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 24 }}>
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5, lineHeight: 1.2, marginBottom: 16 }}>
+                      You're In!
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7, marginBottom: 24 }}>
+                      Your application has been received. The next step is scheduling your in-person interview at our Scottsdale studio.
+                    </div>
+                    <button style={{
+                      width: '100%', padding: '18px 0', borderRadius: radius.card, background: '#FFFFFF', border: 'none',
+                      fontFamily: fonts.sans, fontSize: 15, fontWeight: 800, color: '#0D0D0D', letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer', marginBottom: 12,
+                    }}>
+                      Schedule Interview
+                    </button>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                      Season 18 — Now Enrolling
+                    </div>
+                  </>
+                ) : isUndecided ? (
+                  <>
+                    {/* Undecided — Keep Going */}
+                    <svg width={56} height={56} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 24 }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4m0-4h.01" />
+                    </svg>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5, lineHeight: 1.2, marginBottom: 16 }}>
+                      Keep Going
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7, marginBottom: 24 }}>
+                      Curiosity is the first step. We saved your info and will reach out to learn more about what you're looking for. No pressure — just a conversation.
+                    </div>
+                    <div style={{
+                      padding: 20, background: colors.surface, borderRadius: radius.card, marginBottom: 16, textAlign: 'left',
+                    }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 8 }}>
+                        In the meantime
+                      </div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6 }}>
+                        Follow us on Instagram to see what our students are doing, watch their transformations, and feel what the community is like from the outside.
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                      Season 18 — Still Time to Join
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Out of State — AIT Program */}
+                    <svg width={56} height={56} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 24 }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                    </svg>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5, lineHeight: 1.2, marginBottom: 16 }}>
+                      Advanced Individual Training
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7, marginBottom: 24 }}>
+                      We see you! Our AIT program is designed for out-of-state students who want Corella & Co training on their own schedule. Personalized 1-on-1 coaching with our instructors, virtual sessions, and guided self-study.
+                    </div>
+                    <div style={{
+                      padding: 20, background: colors.surface, borderRadius: radius.card, marginBottom: 16, textAlign: 'left',
+                    }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 8 }}>
+                        What's Included
+                      </div>
+                      {['1-on-1 virtual coaching sessions', 'Personalized training curriculum', 'Video feedback on posing & runway', 'Access to Continuum Club community'].map((item, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                          <div style={{ width: 4, height: 4, borderRadius: '50%', background: colors.text2, flexShrink: 0 }} />
+                          <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5 }}>{item}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                      We'll be in touch to discuss your training plan
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
