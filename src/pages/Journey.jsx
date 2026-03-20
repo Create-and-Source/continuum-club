@@ -128,11 +128,12 @@ export default function Journey() {
             position: 'relative',
             height: 220,
           }}>
-            <img src={P.t3} alt="Before" style={{
+            <img src={P.t1} alt="Before" style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: 'grayscale(100%)',
+              objectPosition: 'center 40%',
+              filter: 'grayscale(100%) contrast(0.85) brightness(0.9)',
             }} />
             <div style={{
               position: 'absolute',
@@ -173,11 +174,12 @@ export default function Journey() {
             position: 'relative',
             height: 220,
           }}>
-            <img src={P.portrait} alt="After" style={{
+            <img src={P.t1} alt="After" style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: 'grayscale(100%)',
+              objectPosition: 'center 20%',
+              filter: 'grayscale(100%) contrast(1.15) brightness(1.1)',
             }} />
             <div style={{
               position: 'absolute',

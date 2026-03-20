@@ -35,11 +35,12 @@ export default function Portfolio() {
       <div style={{ position: 'relative', height: 280, overflow: 'hidden' }}>
         <div style={{ display: 'flex', height: '100%' }}>
           <div style={{ flex: 1, position: 'relative' }}>
-            <img src={P.t3} alt="Before" style={{
+            <img src={P.t1} alt="Before" style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: 'grayscale(100%)',
+              objectPosition: 'center 40%',
+              filter: 'grayscale(100%) contrast(0.85) brightness(0.9)',
             }} />
             <div style={{
               position: 'absolute',
@@ -71,11 +72,12 @@ export default function Portfolio() {
           </div>
           <div style={{ width: 2, background: colors.bg }} />
           <div style={{ flex: 1, position: 'relative' }}>
-            <img src={P.portrait} alt="Now" style={{
+            <img src={P.t1} alt="Now" style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: 'grayscale(100%)',
+              objectPosition: 'center 20%',
+              filter: 'grayscale(100%) contrast(1.15) brightness(1.1)',
             }} />
             <div style={{
               position: 'absolute',
