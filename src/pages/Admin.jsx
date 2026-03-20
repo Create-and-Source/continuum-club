@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set } from '../store'
+import useDesktop from '../hooks/useDesktop'
 
 const defaultMembers = [
   { id: 'm1', name: 'Brianna Cole', season: 18, status: 'Active', streak: 12, sessions: 47, avatar: P.t1, mood: 'Strong', mentor: 'Corella' },
@@ -34,6 +35,7 @@ const defaultAnnouncements = [
 ]
 
 export default function Admin() {
+  const desktop = useDesktop()
   const [activeTab, setActiveTab] = useState('Dashboard')
   const applications = get('applications', [])
   const referrals = get('referrals', [])
@@ -139,6 +141,578 @@ export default function Admin() {
 
   const tabs = ['Dashboard', 'Members', 'Events', 'Content', 'Apps', 'Messages']
 
+  // ═══════════════════════════════════════════
+  // DESKTOP LAYOUT
+  // ═══════════════════════════════════════════
+  if (desktop) {
+    return (
+      <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 60 }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 32px' }}>
+          {/* Header */}
+          <div style={{ padding: '40px 0 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 32, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1 }}>
+                  Admin
+                </div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, marginTop: 6 }}>
+                  Continuum Club Management
+                </div>
+              </div>
+              <img src={P.logo} alt="Corella" style={{ height: 32, opacity: 0.5 }} />
+            </div>
+          </div>
+
+          {/* Tabs — horizontal bar */}
+          <div style={{
+            display: 'flex', gap: 0, marginTop: 24, borderBottom: `1px solid ${colors.border}`,
+          }}>
+            {tabs.map(t => (
+              <button key={t} onClick={() => setActiveTab(t)} style={{
+                padding: '12px 20px', borderRadius: 0, background: 'none', border: 'none',
+                borderBottom: `2px solid ${activeTab === t ? '#FFFFFF' : 'transparent'}`,
+                fontFamily: fonts.sans, fontSize: 12, fontWeight: activeTab === t ? 700 : 500,
+                color: activeTab === t ? colors.text : colors.text3,
+                letterSpacing: 0.8, textTransform: 'uppercase', cursor: 'pointer', whiteSpace: 'nowrap',
+                marginBottom: -1,
+              }}>{t}</button>
+            ))}
+          </div>
+
+          {/* ── DASHBOARD TAB ── */}
+          {activeTab === 'Dashboard' && (
+            <div style={{ marginTop: 28 }}>
+              {/* Top row: 4 metrics + season info */}
+              <div style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
+                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                  {[
+                    { value: String(activeMembers), label: 'Active Members', sub: `${members.length} total` },
+                    { value: String(applications.length), label: 'Applications', sub: applications.length > 0 ? `${applications.filter((_, i) => !appStatuses[i]).length} pending` : 'None yet' },
+                    { value: String(avgStreak), label: 'Avg Streak', sub: 'days' },
+                    { value: String(totalSessions), label: 'Total Sessions', sub: 'all members' },
+                  ].map((stat, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05 }} style={{
+                      background: colors.surface, borderRadius: radius.card, padding: 20,
+                    }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 32, fontWeight: 900, color: colors.text, lineHeight: 1 }}>{stat.value}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text2, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 8 }}>{stat.label}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3, marginTop: 2 }}>{stat.sub}</div>
+                    </motion.div>
+                  ))}
+                </div>
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} style={{
+                  background: colors.surface, borderRadius: radius.card, padding: 20, minWidth: 200,
+                  display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 16,
+                }}>
+                  <div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text3, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 }}>Current Season</div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 36, fontWeight: 900, color: colors.text, lineHeight: 1 }}>18</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text3, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 4 }}>Enrollment</div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 18, fontWeight: 800, color: colors.text }}>Open</div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Bottom: 2-column layout */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 24 }}>
+                {/* Left column: Member Moods + Member list preview */}
+                <div>
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>Member Moods Today</div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {members.filter(m => m.status === 'Active').map((m, i) => (
+                        <div key={i} style={{
+                          display: 'flex', alignItems: 'center', gap: 8, background: colors.surface, borderRadius: radius.pill, padding: '6px 12px 6px 6px',
+                        }}>
+                          <div style={{ width: 24, height: 24, borderRadius: '50%', overflow: 'hidden' }}>
+                            <img src={m.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                          </div>
+                          <span style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text2 }}>{m.name.split(' ')[0]}</span>
+                          <span style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text3 }}>{m.mood}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} style={{ marginTop: 20 }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>Members</div>
+                    {members.slice(0, 4).map((m, i) => (
+                      <div key={i} style={{
+                        background: colors.surface, borderRadius: radius.card, padding: 12, marginBottom: 8,
+                        display: 'flex', alignItems: 'center', gap: 12,
+                      }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                          <img src={m.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text }}>{m.name}</div>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3 }}>S{m.season} · {m.streak}d streak</div>
+                        </div>
+                        <div style={{
+                          padding: '3px 10px', borderRadius: radius.pill,
+                          background: m.status === 'Active' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
+                          fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: m.status === 'Active' ? colors.text : colors.text3,
+                          letterSpacing: 0.5, textTransform: 'uppercase',
+                        }}>{m.status}</div>
+                      </div>
+                    ))}
+                    <button onClick={() => setActiveTab('Members')} style={{
+                      marginTop: 4, background: 'none', border: 'none', fontFamily: fonts.sans, fontSize: 11,
+                      fontWeight: 600, color: colors.text2, cursor: 'pointer', letterSpacing: 0.5, textTransform: 'uppercase',
+                      padding: '6px 0',
+                    }}>View All Members &rarr;</button>
+                  </motion.div>
+                </div>
+
+                {/* Right column: Upcoming Events + Recent Applications */}
+                <div>
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>Upcoming Events</div>
+                    {allEvents.slice(0, 3).map((e, i) => (
+                      <div key={i} style={{
+                        background: colors.surface, borderRadius: radius.card, padding: 14, marginBottom: 8,
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      }}>
+                        <div>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 700, color: colors.text }}>{e.title}</div>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3, marginTop: 2 }}>{e.date} · {e.type}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 800, color: colors.text }}>{e.rsvps}/{e.capacity}</div>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 400, color: colors.text3 }}>RSVPs</div>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} style={{ marginTop: 20 }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>Recent Applications</div>
+                    {applications.length === 0 ? (
+                      <div style={{
+                        background: colors.surface, borderRadius: radius.card, padding: 20, textAlign: 'center',
+                        fontFamily: fonts.sans, fontSize: 13, color: colors.text3,
+                      }}>No applications yet</div>
+                    ) : (
+                      applications.slice(0, 3).map((a, i) => {
+                        const status = appStatuses[i] || 'Pending'
+                        return (
+                          <div key={i} style={{
+                            background: colors.surface, borderRadius: radius.card, padding: 14, marginBottom: 8,
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          }}>
+                            <div>
+                              <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text }}>{a.name || 'Applicant'}</div>
+                              <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3, marginTop: 2 }}>{a.email}</div>
+                            </div>
+                            <div style={{
+                              padding: '3px 10px', borderRadius: radius.pill,
+                              background: status === 'Approved' ? 'rgba(255,255,255,0.12)' : status === 'Rejected' ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
+                              fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+                              color: status === 'Approved' ? colors.text : status === 'Rejected' ? colors.text3 : colors.text2,
+                              letterSpacing: 0.5, textTransform: 'uppercase',
+                            }}>{status}</div>
+                          </div>
+                        )
+                      })
+                    )}
+                    {applications.length > 0 && (
+                      <button onClick={() => setActiveTab('Apps')} style={{
+                        marginTop: 4, background: 'none', border: 'none', fontFamily: fonts.sans, fontSize: 11,
+                        fontWeight: 600, color: colors.text2, cursor: 'pointer', letterSpacing: 0.5, textTransform: 'uppercase',
+                        padding: '6px 0',
+                      }}>View All Applications &rarr;</button>
+                    )}
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── MEMBERS TAB — Table layout ── */}
+          {activeTab === 'Members' && (
+            <div style={{ marginTop: 24 }}>
+              {/* Table header */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: '48px 1.5fr 0.6fr 0.7fr 0.6fr 0.7fr 0.7fr 1fr',
+                gap: 0, padding: '10px 16px', borderBottom: `1px solid ${colors.border}`,
+              }}>
+                {['', 'Name', 'Season', 'Status', 'Streak', 'Sessions', 'Mood', 'Mentor'].map((h, i) => (
+                  <div key={i} style={{
+                    fontFamily: fonts.sans, fontSize: 10, fontWeight: 700, color: colors.text3,
+                    letterSpacing: 1.2, textTransform: 'uppercase',
+                  }}>{h}</div>
+                ))}
+              </div>
+
+              {/* Table rows */}
+              {members.map((m, i) => {
+                const isExpanded = expandedMember === m.id
+                const moodHistory = get('moodHistory', [])
+                const journalCount = get('journalEntries', []).length
+
+                return (
+                  <motion.div key={m.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} style={{
+                    borderBottom: `1px solid ${colors.border}`,
+                  }}>
+                    <div
+                      onClick={() => setExpandedMember(isExpanded ? null : m.id)}
+                      style={{
+                        display: 'grid', gridTemplateColumns: '48px 1.5fr 0.6fr 0.7fr 0.6fr 0.7fr 0.7fr 1fr',
+                        gap: 0, padding: '14px 16px', alignItems: 'center', cursor: 'pointer',
+                        background: isExpanded ? colors.surface : 'transparent',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+                      onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden' }}>
+                        <img src={m.avatar} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                      </div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 700, color: colors.text }}>{m.name}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 500, color: colors.text2 }}>S{m.season}</div>
+                      <div style={{
+                        display: 'inline-flex', alignSelf: 'center',
+                      }}>
+                        <span style={{
+                          padding: '3px 10px', borderRadius: radius.pill,
+                          background: m.status === 'Active' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
+                          fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: m.status === 'Active' ? colors.text : colors.text3,
+                          letterSpacing: 0.5, textTransform: 'uppercase',
+                        }}>{m.status}</span>
+                      </div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 600, color: colors.text }}>{m.streak}d</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 500, color: colors.text2 }}>{m.sessions}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2 }}>{m.mood}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: m.mentor ? colors.text2 : colors.text3 }}>{m.mentor || '—'}</div>
+                    </div>
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <div style={{ padding: '0 16px 20px', background: colors.surface }}>
+                            <div style={{ display: 'flex', gap: 24, paddingTop: 16, borderTop: `1px solid ${colors.border}` }}>
+                              {/* Stats */}
+                              <div style={{ display: 'flex', gap: 16 }}>
+                                {[
+                                  { label: 'Sessions', value: m.sessions },
+                                  { label: 'Streak', value: `${m.streak}d` },
+                                  { label: 'Journals', value: journalCount },
+                                ].map((s, si) => (
+                                  <div key={si} style={{ textAlign: 'center', padding: '10px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: radius.sm }}>
+                                    <div style={{ fontFamily: fonts.sans, fontSize: 20, fontWeight: 900, color: colors.text, lineHeight: 1 }}>{s.value}</div>
+                                    <div style={{ fontFamily: fonts.sans, fontSize: 9, fontWeight: 500, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4 }}>{s.label}</div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Mood */}
+                              <div>
+                                <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Current Mood</div>
+                                <div style={{
+                                  padding: '6px 12px', borderRadius: radius.pill, background: 'rgba(255,255,255,0.06)', display: 'inline-block',
+                                  fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: colors.text2,
+                                }}>{m.mood}</div>
+                              </div>
+
+                              {/* Status toggle */}
+                              <div>
+                                <button
+                                  onClick={() => updateMemberOverride(m.id, 'status', m.status === 'Active' ? 'Inactive' : 'Active')}
+                                  style={{
+                                    padding: '10px 24px', borderRadius: radius.pill,
+                                    background: m.status === 'Active' ? 'rgba(255,255,255,0.06)' : '#FFFFFF',
+                                    border: m.status === 'Active' ? `1px solid ${colors.border}` : 'none',
+                                    color: m.status === 'Active' ? colors.text3 : '#0D0D0D',
+                                    fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                                  }}
+                                >
+                                  {m.status === 'Active' ? 'Set Inactive' : 'Set Active'}
+                                </button>
+                              </div>
+
+                              {/* Mentor assignment */}
+                              <div>
+                                <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Assign Mentor</div>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  {mentorOptions.map(mentor => {
+                                    const isSelected = (mentor === 'None' && !m.mentor) || mentor === m.mentor
+                                    return (
+                                      <button
+                                        key={mentor}
+                                        onClick={() => updateMemberOverride(m.id, 'mentor', mentor === 'None' ? null : mentor)}
+                                        style={{
+                                          padding: '6px 14px', borderRadius: radius.pill,
+                                          border: `1px solid ${isSelected ? colors.text : colors.border}`,
+                                          background: isSelected ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                          fontFamily: fonts.sans, fontSize: 11, fontWeight: isSelected ? 700 : 500,
+                                          color: isSelected ? colors.text : colors.text3,
+                                          cursor: 'pointer', transition: 'all 0.15s',
+                                        }}
+                                      >{mentor}</button>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* ── EVENTS TAB — 2-column: list + create form ── */}
+          {activeTab === 'Events' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24, marginTop: 24 }}>
+              {/* Left: Event list */}
+              <div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>All Events</div>
+                {allEvents.map((e, i) => {
+                  const isCustom = e.id.startsWith('ce_')
+                  const customIdx = isCustom ? customEvents.findIndex(ce => ce.id === e.id) : -1
+                  return (
+                    <motion.div key={e.id || i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{
+                      background: colors.surface, borderRadius: radius.card, padding: 18, marginBottom: 10,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      opacity: e.visible === false ? 0.5 : 1,
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.2 }}>{e.title}</div>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 400, color: colors.text3, marginTop: 3 }}>
+                          {e.date} · {e.type}
+                          {e.visible === false && ' · Draft'}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 22, fontWeight: 900, color: colors.text, lineHeight: 1 }}>{e.rsvps}</div>
+                          <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 500, color: colors.text3, textTransform: 'uppercase' }}>of {e.capacity}</div>
+                        </div>
+                        {isCustom && (
+                          <button onClick={() => toggleEventVisibility(customIdx, true)} style={{
+                            padding: '4px 12px', borderRadius: radius.pill, border: `1px solid ${colors.border}`,
+                            background: 'transparent', fontFamily: fonts.sans, fontSize: 9, fontWeight: 600,
+                            color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                          }}>
+                            {e.visible === false ? 'Show' : 'Hide'}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Right: Create Event form — always visible */}
+              <div>
+                <div style={{ background: colors.surface, borderRadius: radius.card, padding: 24, position: 'sticky', top: 24 }}>
+                  <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 18 }}>Create Event</div>
+                  <input value={newEvent.title} onChange={e => setNewEvent({ ...newEvent, title: e.target.value })} placeholder="Event title"
+                    style={{ width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border}`, borderRadius: radius.sm, fontFamily: fonts.sans, fontSize: 14, fontWeight: 500, color: colors.text, marginBottom: 10, boxSizing: 'border-box' }} />
+                  <input value={newEvent.date} onChange={e => setNewEvent({ ...newEvent, date: e.target.value })} placeholder="Date (e.g. Jun 7, 2026)"
+                    style={{ width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border}`, borderRadius: radius.sm, fontFamily: fonts.sans, fontSize: 14, fontWeight: 500, color: colors.text, marginBottom: 10, boxSizing: 'border-box' }} />
+                  <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Type</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                    {eventTypes.map(t => (
+                      <button key={t} onClick={() => setNewEvent({ ...newEvent, type: t })} style={{
+                        padding: '6px 14px', borderRadius: radius.pill,
+                        border: `1px solid ${newEvent.type === t ? colors.text : colors.border}`,
+                        background: newEvent.type === t ? 'rgba(255,255,255,0.1)' : 'transparent',
+                        fontFamily: fonts.sans, fontSize: 11, fontWeight: newEvent.type === t ? 700 : 500,
+                        color: newEvent.type === t ? colors.text : colors.text3, cursor: 'pointer',
+                      }}>{t}</button>
+                    ))}
+                  </div>
+                  <input type="number" value={newEvent.capacity} onChange={e => setNewEvent({ ...newEvent, capacity: e.target.value })} placeholder="Capacity"
+                    style={{ width: '100%', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${colors.border}`, borderRadius: radius.sm, fontFamily: fonts.sans, fontSize: 14, fontWeight: 500, color: colors.text, marginBottom: 16, boxSizing: 'border-box' }} />
+                  <button onClick={createEvent} style={{
+                    width: '100%', padding: '14px 0', borderRadius: radius.card, background: '#FFFFFF', border: 'none',
+                    fontFamily: fonts.sans, fontSize: 13, fontWeight: 800, color: '#0D0D0D', letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer',
+                  }}>Save Event</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── CONTENT TAB — 2-column: Sparks + Announcements ── */}
+          {activeTab === 'Content' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 24 }}>
+              {/* Left: Sparks */}
+              <div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+                  Daily Spark Affirmations
+                </div>
+                {sparks.map((s, i) => (
+                  <div key={i} style={{
+                    background: colors.surface, borderRadius: radius.card, padding: 16, marginBottom: 8,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5, flex: 1 }}>{s}</div>
+                    <button onClick={() => removeSpark(i)} style={{
+                      width: 28, height: 28, borderRadius: '50%', border: `1px solid ${colors.border}`, background: 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0,
+                    }}>
+                      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <input value={newSpark} onChange={e => setNewSpark(e.target.value)} placeholder="Add new affirmation..." onKeyDown={e => e.key === 'Enter' && addSpark()}
+                    style={{ flex: 1, padding: '10px 14px', background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.sm, fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text }} />
+                  <button onClick={addSpark} style={{
+                    padding: '10px 16px', borderRadius: radius.sm, background: '#FFFFFF', border: 'none',
+                    fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: '#0D0D0D', letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                  }}>Add</button>
+                </div>
+              </div>
+
+              {/* Right: Announcements */}
+              <div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+                  Announcements
+                </div>
+                {announcements.map((a, i) => (
+                  <div key={i} style={{
+                    background: colors.surface, borderRadius: radius.card, padding: 16, marginBottom: 8,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                    opacity: a.active ? 1 : 0.5,
+                  }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5, flex: 1 }}>{a.text}</div>
+                    <button onClick={() => toggleAnnouncement(i)} style={{
+                      padding: '4px 12px', borderRadius: radius.pill, border: `1px solid ${colors.border}`, background: 'transparent',
+                      fontFamily: fonts.sans, fontSize: 9, fontWeight: 600, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer', flexShrink: 0,
+                    }}>
+                      {a.active ? 'Archive' : 'Restore'}
+                    </button>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <input value={newAnnouncement} onChange={e => setNewAnnouncement(e.target.value)} placeholder="New announcement..." onKeyDown={e => e.key === 'Enter' && addAnnouncement()}
+                    style={{ flex: 1, padding: '10px 14px', background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: radius.sm, fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text }} />
+                  <button onClick={addAnnouncement} style={{
+                    padding: '10px 16px', borderRadius: radius.sm, background: '#FFFFFF', border: 'none',
+                    fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: '#0D0D0D', letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                  }}>Add</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── APPS TAB — Wide cards ── */}
+          {activeTab === 'Apps' && (
+            <div style={{ marginTop: 24 }}>
+              {applications.length === 0 && referrals.length === 0 && (
+                <div style={{ marginTop: 40, textAlign: 'center', fontFamily: fonts.sans, fontSize: 14, color: colors.text3 }}>
+                  No applications or referrals yet. Applications submitted through the Apply flow will appear here.
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                {applications.map((a, i) => {
+                  const status = appStatuses[i] || 'Pending'
+                  return (
+                    <motion.div key={`a${i}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{
+                      background: colors.surface, borderRadius: radius.card, padding: 20,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 16, fontWeight: 700, color: colors.text }}>{a.name || 'Applicant'}</div>
+                        <div style={{
+                          padding: '3px 10px', borderRadius: radius.pill,
+                          background: status === 'Approved' ? 'rgba(255,255,255,0.12)' : status === 'Rejected' ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
+                          fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+                          color: status === 'Approved' ? colors.text : status === 'Rejected' ? colors.text3 : colors.text2,
+                          letterSpacing: 0.5, textTransform: 'uppercase',
+                        }}>{status}</div>
+                      </div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text3, marginBottom: 4 }}>
+                        {a.email} {a.phone ? `· ${a.phone}` : ''} {a.instagram ? `· ${a.instagram}` : ''}
+                      </div>
+                      {a.location && (
+                        <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text3, marginTop: 2 }}>
+                          Location: {a.location}
+                        </div>
+                      )}
+                      {status === 'Pending' && (
+                        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                          <button onClick={() => updateAppStatus(i, 'Approved')} style={{
+                            flex: 1, padding: '10px 0', borderRadius: radius.pill, background: '#FFFFFF', border: 'none',
+                            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: '#0D0D0D', letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                          }}>Approve</button>
+                          <button onClick={() => updateAppStatus(i, 'Interview')} style={{
+                            flex: 1, padding: '10px 0', borderRadius: radius.pill, border: `1px solid ${colors.border}`, background: 'transparent',
+                            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text2, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                          }}>Interview</button>
+                          <button onClick={() => updateAppStatus(i, 'Rejected')} style={{
+                            padding: '10px 14px', borderRadius: radius.pill, border: `1px solid ${colors.border}`, background: 'transparent',
+                            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                          }}>Decline</button>
+                        </div>
+                      )}
+                    </motion.div>
+                  )
+                })}
+              </div>
+              {referrals.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+                  {referrals.map((r, i) => (
+                    <motion.div key={`r${i}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} style={{
+                      background: colors.surface, borderRadius: radius.card, padding: 20,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 700, color: colors.text }}>{r.name}</div>
+                        <div style={{ padding: '3px 10px', borderRadius: radius.pill, background: 'rgba(255,255,255,0.06)', fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase' }}>Referral</div>
+                      </div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text3 }}>{r.email} · Referred by {r.referredBy}</div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── MESSAGES TAB — Wide cards ── */}
+          {activeTab === 'Messages' && (
+            <div style={{ marginTop: 24 }}>
+              {contactMessages.length === 0 && (
+                <div style={{ marginTop: 40, textAlign: 'center', fontFamily: fonts.sans, fontSize: 14, color: colors.text3 }}>
+                  No messages yet. Messages from the Contact form will appear here.
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                {contactMessages.map((m, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{
+                    background: colors.surface, borderRadius: radius.card, padding: 20,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 700, color: colors.text }}>{m.name}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 400, color: colors.text3 }}>{m.email}</div>
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6 }}>{m.message}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ═══════════════════════════════════════════
+  // MOBILE LAYOUT (original, unchanged)
+  // ═══════════════════════════════════════════
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
       {/* Header */}

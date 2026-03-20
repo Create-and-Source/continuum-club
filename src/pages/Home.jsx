@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
 import GuidedFlow from '../components/GuidedFlow'
+import useDesktop from '../hooks/useDesktop'
 
 const moods = ['On Fire', 'Strong', 'Steady', 'Working On It', 'Gentle']
 
@@ -116,8 +117,24 @@ function RitualOverlay({ onClose }) {
   )
 }
 
+const quickLinks = [
+  { label: 'Journal', path: '/journal', icon: 'M4 4h16v16H4V4zm2 2v12h12V6H6zm2 3h8m-8 3h6' },
+  { label: 'Portfolio', path: '/portfolio', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
+  { label: 'Benefits', path: '/benefits', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { label: 'Journey', path: '/journey', icon: 'M22 12l-4-4v3H3v2h15v3l4-4z' },
+  { label: 'Mentorship', path: '/mentorship', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' },
+]
+
+const weeklyStats = [
+  { label: 'Sparks', valueKey: 'sparks' },
+  { label: 'Refreshers', valueKey: 'refreshers' },
+  { label: 'Shoots', valueKey: 'shoots' },
+  { label: 'Wins Shared', valueKey: 'wins' },
+]
+
 export default function Home() {
   const navigate = useNavigate()
+  const desktop = useDesktop()
   const [mood, setMood] = useState(() => get('todayMood', null))
   const [moodSaved, setMoodSaved] = useState(false)
   const [showRitual, setShowRitual] = useState(false)
@@ -192,38 +209,291 @@ export default function Home() {
     set('streak', newStreak)
   }
 
+  // ─── Overlays (shared between mobile and desktop) ───
+  const overlays = (
+    <AnimatePresence>
+      {showRitual && <RitualOverlay onClose={handleRitualComplete} />}
+      {showSparkFlow && (
+        <GuidedFlow
+          title="Morning Spark"
+          bg={P.portrait}
+          onClose={() => setShowSparkFlow(false)}
+          onComplete={handleSparkDone}
+          steps={[
+            { title: 'Read Aloud', instruction: spark.affirmation.replace(/"/g, ''), seconds: 12 },
+            { title: 'Sit With It', instruction: `Let those words land. ${spark.source}`, seconds: 10 },
+            { title: 'Reflect', instruction: 'What does this spark mean to you right now?', input: true, placeholder: 'One line is enough...' },
+          ]}
+        />
+      )}
+      {showWeeklyCheckin && (
+        <GuidedFlow
+          title="Weekly Check-In"
+          bg={P.studio}
+          onClose={() => setShowWeeklyCheckin(false)}
+          onComplete={handleWeeklyCheckin}
+          steps={[
+            { title: 'Highlight', instruction: 'What was your proudest moment this week?', input: true, placeholder: 'The moment that mattered most...' },
+            { title: 'Growth', instruction: 'Where did you surprise yourself?', input: true, placeholder: 'Something you did differently...' },
+            { title: 'Release', instruction: 'What are you letting go of before next week?', input: true, placeholder: 'Let it go...' },
+            { title: 'Intention', instruction: 'Set one intention for the week ahead.', input: true, placeholder: 'Next week I will...' },
+          ]}
+        />
+      )}
+    </AnimatePresence>
+  )
+
+  // ─── DESKTOP LAYOUT ───
+  if (desktop) {
+    return (
+      <div style={{ minHeight: '100vh' }}>
+        {overlays}
+
+        {/* Cover Banner */}
+        <div style={{ position: 'relative', height: 200, overflow: 'hidden', width: '100%' }}>
+          <img src={P.hero} alt="Corella" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'grayscale(100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(13,13,13,0.85) 100%)' }} />
+          <div style={{ position: 'absolute', bottom: 24, left: 40, right: 40, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 500, color: colors.text2, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>
+                {getGreeting()}
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 36, fontWeight: 900, color: colors.text, letterSpacing: -0.5, textTransform: 'uppercase', lineHeight: 1.1 }}>
+                Brianna
+              </div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 500, color: colors.text3, letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 6 }}>
+                Stay Sharp. Stay Balanced. Stay Ahead.
+              </div>
+            </div>
+            <img src={P.logo} alt="Corella & Co" style={{ height: 36, opacity: 0.7 }} />
+          </div>
+        </div>
+
+        {/* 3-Column Grid */}
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 300px', gap: 32, paddingTop: 28, paddingBottom: 60 }}>
+
+            {/* ─── LEFT COLUMN ─── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* Streak Counter */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{
+                background: colors.surface, borderRadius: radius.card, padding: 24,
+              }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
+                  Current Streak
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
+                  <span style={{ fontFamily: fonts.sans, fontSize: 48, fontWeight: 900, color: colors.text, lineHeight: 1 }}>{streak}</span>
+                  <span style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 600, color: colors.text2, textTransform: 'uppercase', letterSpacing: 1 }}>Days</span>
+                </div>
+                <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} style={{
+                      width: 10, height: 36 + (i < 5 ? i * 5 : (6 - i) * 5), borderRadius: 5,
+                      background: i < 5 ? colors.text : 'rgba(255,255,255,0.15)',
+                    }} />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Mood Check-in */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} style={{
+                background: colors.surface, borderRadius: radius.card, padding: 24,
+              }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+                  How are you showing up today?
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {moods.map(m => (
+                    <button key={m} onClick={() => handleMood(m)} style={{
+                      padding: '10px 16px', borderRadius: radius.pill, textAlign: 'left',
+                      border: `1px solid ${mood === m ? colors.text : colors.border}`,
+                      background: mood === m ? colors.text : 'transparent',
+                      color: mood === m ? colors.bg : colors.text2,
+                      fontFamily: fonts.sans, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                    }}>
+                      {m}
+                    </button>
+                  ))}
+                </div>
+                <AnimatePresence>
+                  {moodSaved && mood && (
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{
+                      marginTop: 12, padding: '10px 16px', background: 'rgba(255,255,255,0.06)', borderRadius: radius.card,
+                      fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2, textAlign: 'center',
+                    }}>
+                      Logged: feeling {mood.toLowerCase()} today
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Weekly Stats */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{
+                background: colors.surface, borderRadius: radius.card, padding: 24,
+              }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 20 }}>
+                  This Week
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                  {[
+                    { label: 'Sparks', value: String(get('sparksCompleted', 0) + 12) },
+                    { label: 'Refreshers', value: '3' },
+                    { label: 'Shoots', value: '1' },
+                    { label: 'Wins Shared', value: String(winsShared) },
+                  ].map((stat, i) => (
+                    <div key={i} style={{ textAlign: 'center' }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, lineHeight: 1 }}>{stat.value}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 500, color: colors.text3, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 6 }}>{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* ─── CENTER COLUMN ─── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* Before I Walk Button — prominent */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <button onClick={() => setShowRitual(true)} style={{
+                  width: '100%', padding: '22px 32px', background: '#FFFFFF', color: '#0D0D0D', border: 'none',
+                  borderRadius: radius.card, fontFamily: fonts.sans, fontSize: 17, fontWeight: 800, letterSpacing: 3,
+                  textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s',
+                }}>
+                  Before I Walk
+                </button>
+              </motion.div>
+
+              {/* Daily Spark — wider card */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} style={{
+                borderRadius: radius.card, overflow: 'hidden', position: 'relative', height: 260,
+              }}>
+                <img src={P.portrait} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%)' }} />
+                <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 32 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase' }}>
+                      Daily Spark
+                    </div>
+                    {sparkDone && (
+                      <div style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase' }}>
+                        Completed
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 22, fontWeight: 700, color: '#FFFFFF', lineHeight: 1.4, marginBottom: 10 }}>
+                      {spark.affirmation}
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, marginBottom: sparkDone ? 0 : 16 }}>
+                      {spark.source}
+                    </div>
+                    {!sparkDone && (
+                      <button onClick={() => setShowSparkFlow(true)} style={{
+                        padding: '10px 28px', borderRadius: radius.pill, background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)',
+                        fontFamily: fonts.sans, fontSize: 12, fontWeight: 700, color: '#FFFFFF', letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+                      }}>
+                        Begin Spark
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Community Wins Feed */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>
+                  Community Wins
+                </div>
+                {communityWins.map((win, i) => (
+                  <div key={i} style={{ background: colors.surface, borderRadius: radius.card, padding: 24, marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={win.avatar} alt={win.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 700, color: colors.text }}>{win.name}</div>
+                        <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase' }}>
+                          Season {win.season.replace('S', '')} Alumni
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, lineHeight: 1.7 }}>{win.text}</div>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Weekly Check-In Button */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <button onClick={() => setShowWeeklyCheckin(true)} style={{
+                  width: '100%', padding: '18px 24px', background: colors.surface, border: `1px solid ${colors.border}`,
+                  borderRadius: radius.card, fontFamily: fonts.sans, fontSize: 14, fontWeight: 700, letterSpacing: 1.5,
+                  textTransform: 'uppercase', color: colors.text2, cursor: 'pointer', transition: 'all 0.2s',
+                }}>
+                  Weekly Check-In
+                </button>
+              </motion.div>
+            </div>
+
+            {/* ─── RIGHT COLUMN ─── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+              {/* Quick Links — single column */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+                  Your Space
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {quickLinks.map((link, i) => (
+                    <button key={i} onClick={() => navigate(link.path)} style={{
+                      background: colors.surface, borderRadius: radius.card, padding: '14px 16px',
+                      display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+                    }}>
+                      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.text2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                        <path d={link.icon} />
+                      </svg>
+                      <span style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        {link.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Coming Up Event */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, color: colors.text3, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+                  Coming Up
+                </div>
+                <div onClick={() => navigate('/events')} style={{ position: 'relative', borderRadius: radius.card, overflow: 'hidden', height: 220, cursor: 'pointer' }}>
+                  <img src={P.event} alt="Next Event" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 100%)' }} />
+                  <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                    <div style={{ display: 'inline-block', padding: '4px 10px', background: 'rgba(255,255,255,0.15)', borderRadius: radius.pill, fontFamily: fonts.sans, fontSize: 10, fontWeight: 600, color: colors.text, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
+                      Refresher Workshop
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 16, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.3 }}>
+                      Posture & Presence Lab
+                    </div>
+                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text2, marginTop: 4 }}>
+                      Apr 12 — 5 days away — 8 spots left
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ─── MOBILE LAYOUT (unchanged) ───
   return (
     <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
-      <AnimatePresence>
-        {showRitual && <RitualOverlay onClose={handleRitualComplete} />}
-        {showSparkFlow && (
-          <GuidedFlow
-            title="Morning Spark"
-            bg={P.portrait}
-            onClose={() => setShowSparkFlow(false)}
-            onComplete={handleSparkDone}
-            steps={[
-              { title: 'Read Aloud', instruction: spark.affirmation.replace(/"/g, ''), seconds: 12 },
-              { title: 'Sit With It', instruction: `Let those words land. ${spark.source}`, seconds: 10 },
-              { title: 'Reflect', instruction: 'What does this spark mean to you right now?', input: true, placeholder: 'One line is enough...' },
-            ]}
-          />
-        )}
-        {showWeeklyCheckin && (
-          <GuidedFlow
-            title="Weekly Check-In"
-            bg={P.studio}
-            onClose={() => setShowWeeklyCheckin(false)}
-            onComplete={handleWeeklyCheckin}
-            steps={[
-              { title: 'Highlight', instruction: 'What was your proudest moment this week?', input: true, placeholder: 'The moment that mattered most...' },
-              { title: 'Growth', instruction: 'Where did you surprise yourself?', input: true, placeholder: 'Something you did differently...' },
-              { title: 'Release', instruction: 'What are you letting go of before next week?', input: true, placeholder: 'Let it go...' },
-              { title: 'Intention', instruction: 'Set one intention for the week ahead.', input: true, placeholder: 'Next week I will...' },
-            ]}
-          />
-        )}
-      </AnimatePresence>
+      {overlays}
 
       {/* Hero */}
       <div style={{ position: 'relative', height: 320, overflow: 'hidden' }}>
@@ -354,13 +624,7 @@ export default function Home() {
           Your Space
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {[
-            { label: 'Journal', path: '/journal', icon: 'M4 4h16v16H4V4zm2 2v12h12V6H6zm2 3h8m-8 3h6' },
-            { label: 'Portfolio', path: '/portfolio', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-            { label: 'Benefits', path: '/benefits', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
-            { label: 'Journey', path: '/journey', icon: 'M22 12l-4-4v3H3v2h15v3l4-4z' },
-            { label: 'Mentorship', path: '/mentorship', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197' },
-          ].map((link, i) => (
+          {quickLinks.map((link, i) => (
             <button key={i} onClick={() => navigate(link.path)} style={{
               background: colors.surface, borderRadius: radius.card, padding: '16px 14px',
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', border: 'none', transition: 'all 0.2s',

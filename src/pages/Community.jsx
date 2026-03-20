@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
 import Celebration from '../components/Celebration'
+import useDesktop from '../hooks/useDesktop'
 
 const tabs = ['Wins', 'Seasons', 'News']
 
@@ -29,6 +30,7 @@ const announcements = [
 ]
 
 export default function Community() {
+  const desktop = useDesktop()
   const [activeTab, setActiveTab] = useState('Wins')
   const [winText, setWinText] = useState('')
   const [userWins, setUserWins] = useState(() => get('userWins', []))
@@ -65,8 +67,383 @@ export default function Community() {
 
   const allWins = [...userWins, ...defaultWins]
 
+  /* ── Shared sub-components ── */
+
+  const renderWinInput = (wider) => (
+    <div style={{
+      margin: wider ? '0 0 20px' : '0 16px 16px',
+      background: colors.surface,
+      borderRadius: radius.card,
+      padding: wider ? 20 : 16,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: wider ? 42 : 36, height: wider ? 42 : 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+          <img src={P.t1} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+        </div>
+        <input
+          value={winText}
+          onChange={e => setWinText(e.target.value)}
+          placeholder="Share a win..."
+          onKeyDown={e => e.key === 'Enter' && handlePostWin()}
+          style={{
+            flex: 1, padding: wider ? '12px 16px' : '10px 14px', borderRadius: radius.pill, border: `1px solid ${colors.border}`,
+            background: 'transparent', fontFamily: fonts.sans, fontSize: wider ? 14 : 13, fontWeight: 400, color: colors.text,
+            outline: 'none',
+          }}
+        />
+        {winText.trim() && (
+          <button onClick={handlePostWin} style={{
+            padding: wider ? '10px 18px' : '8px 14px', borderRadius: radius.pill, background: '#FFFFFF', color: '#0D0D0D', border: 'none',
+            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+          }}>
+            Post
+          </button>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderWinCard = (win, i, wider) => {
+    const isSup = supported[win.id]
+    return (
+      <motion.div key={win.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} style={{
+        margin: wider ? '0 0 16px' : '0 16px 12px',
+        background: colors.surface,
+        borderRadius: radius.card,
+        padding: wider ? 22 : 16,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: wider ? 14 : 12 }}>
+          <div style={{ width: wider ? 46 : 40, height: wider ? 46 : 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <img src={win.avatar} alt={win.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: fonts.sans, fontSize: wider ? 15 : 14, fontWeight: 700, color: colors.text }}>{win.name}</div>
+            <div style={{ fontFamily: fonts.sans, fontSize: wider ? 12 : 11, fontWeight: 500, color: colors.text3, letterSpacing: 0.5 }}>
+              Season {win.season} · {win.time}
+            </div>
+          </div>
+        </div>
+        <div style={{ fontFamily: fonts.sans, fontSize: wider ? 15 : 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, marginBottom: wider ? 16 : 14 }}>
+          {win.text}
+        </div>
+        <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${colors.border}`, paddingTop: 12 }}>
+          <button onClick={() => toggleSupport(win.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill={isSup ? '#FFFFFF' : 'none'} stroke={isSup ? '#FFFFFF' : colors.text3} strokeWidth={1.8}>
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+            <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: isSup ? colors.text : colors.text3 }}>
+              Support · {win.supports + (isSup ? 1 : 0)}
+            </span>
+          </button>
+          <button onClick={() => { /* Reply coming soon */ }} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={1.8}>
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            </svg>
+            <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: colors.text3 }}>
+              Reply · {win.replies}
+            </span>
+          </button>
+        </div>
+      </motion.div>
+    )
+  }
+
+  const renderSeasonCard = (s, i, isGrid) => (
+    <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
+      margin: isGrid ? 0 : '0 16px 16px',
+      borderRadius: radius.card,
+      overflow: 'hidden',
+      position: 'relative',
+      height: isGrid ? 220 : 160,
+    }}>
+      <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)' }} />
+      <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontFamily: fonts.sans, fontSize: isGrid ? 42 : 36, fontWeight: 900, color: colors.text, lineHeight: 1 }}>S{s.number}</div>
+            <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2, marginTop: 2 }}>
+              {s.title} · {s.members} members
+            </div>
+          </div>
+          <div style={{
+            padding: '4px 12px', borderRadius: radius.pill,
+            background: s.status === 'Active' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+            fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+            color: s.status === 'Active' ? colors.text : colors.text3,
+            letterSpacing: 1, textTransform: 'uppercase',
+          }}>{s.status}</div>
+        </div>
+      </div>
+    </motion.div>
+  )
+
+  const renderAnnouncementCard = (a, i, wider) => (
+    <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
+      margin: wider ? '0 0 14px' : '0 16px 12px',
+      background: colors.surface,
+      borderRadius: radius.card,
+      padding: wider ? 22 : 18,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <div style={{
+          padding: '3px 10px', borderRadius: radius.pill,
+          background: a.type === 'Opportunity' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
+          fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+          color: a.type === 'Opportunity' ? colors.text : colors.text3,
+          letterSpacing: 1, textTransform: 'uppercase',
+        }}>{a.type}</div>
+        <span style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3 }}>{a.time}</span>
+      </div>
+      <div style={{ fontFamily: fonts.sans, fontSize: wider ? 17 : 16, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.2, marginBottom: 6 }}>{a.title}</div>
+      <div style={{ fontFamily: fonts.sans, fontSize: wider ? 14 : 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5 }}>{a.text}</div>
+    </motion.div>
+  )
+
+  /* ── Sidebar (desktop only) ── */
+
+  const renderSidebar = () => (
+    <div style={{ flex: '0 0 35%', minWidth: 0 }}>
+      {/* Seasons compact */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+          Seasons
+        </div>
+        {seasons.map((s, i) => (
+          <motion.div key={i} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }} style={{
+            display: 'flex', alignItems: 'center', gap: 12, background: colors.surface, borderRadius: radius.card,
+            padding: 12, marginBottom: 8, overflow: 'hidden',
+          }}>
+            <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+              <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: fonts.sans, fontSize: 18, fontWeight: 900, color: colors.text, lineHeight: 1 }}>S{s.number}</div>
+              <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text3, marginTop: 2 }}>
+                {s.members} members
+              </div>
+            </div>
+            <div style={{
+              padding: '3px 10px', borderRadius: radius.pill,
+              background: s.status === 'Active' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+              fontFamily: fonts.sans, fontSize: 9, fontWeight: 600,
+              color: s.status === 'Active' ? colors.text : colors.text3,
+              letterSpacing: 1, textTransform: 'uppercase', flexShrink: 0,
+            }}>{s.status}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Announcements compact */}
+      <div>
+        <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, color: colors.text3, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+          Announcements
+        </div>
+        {announcements.map((a, i) => (
+          <motion.div key={i} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }} style={{
+            background: colors.surface, borderRadius: radius.card, padding: 14, marginBottom: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{
+                padding: '2px 8px', borderRadius: radius.pill,
+                background: a.type === 'Opportunity' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
+                fontFamily: fonts.sans, fontSize: 9, fontWeight: 600,
+                color: a.type === 'Opportunity' ? colors.text : colors.text3,
+                letterSpacing: 1, textTransform: 'uppercase',
+              }}>{a.type}</div>
+              <span style={{ fontFamily: fonts.sans, fontSize: 10, fontWeight: 400, color: colors.text3 }}>{a.time}</span>
+            </div>
+            <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.2, marginBottom: 4 }}>{a.title}</div>
+            <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 400, color: colors.text2, lineHeight: 1.4 }}>{a.text}</div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+
+  /* ── MOBILE LAYOUT (unchanged) ── */
+
+  if (!desktop) {
+    return (
+      <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+        <AnimatePresence>
+          {showCelebration && (
+            <Celebration
+              title={`"${celebrationText}"`}
+              subtitle="Win shared with the community"
+              icon={
+                <svg width={48} height={48} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                </svg>
+              }
+              onDone={() => setShowCelebration(false)}
+            />
+          )}
+        </AnimatePresence>
+        <div style={{ padding: '56px 20px 0' }}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1 }}>
+            Community
+          </div>
+          <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, marginTop: 6 }}>
+            Wins over likes. Support over competition.
+          </div>
+        </div>
+
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', margin: '20px 16px 0', background: colors.surface, borderRadius: radius.card, padding: 4 }}>
+          {tabs.map(t => (
+            <button key={t} onClick={() => setActiveTab(t)} style={{
+              flex: 1, padding: '10px 0', borderRadius: 12,
+              background: activeTab === t ? colors.text : 'transparent',
+              color: activeTab === t ? colors.bg : colors.text3,
+              fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}>
+              {t}
+            </button>
+          ))}
+        </div>
+
+        {/* Wins */}
+        {activeTab === 'Wins' && (
+          <div style={{ marginTop: 20 }}>
+            {/* Share a Win */}
+            <div style={{ margin: '0 16px 16px', background: colors.surface, borderRadius: radius.card, padding: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+                }}>
+                  <img src={P.t1} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                </div>
+                <input
+                  value={winText}
+                  onChange={e => setWinText(e.target.value)}
+                  placeholder="Share a win..."
+                  onKeyDown={e => e.key === 'Enter' && handlePostWin()}
+                  style={{
+                    flex: 1, padding: '10px 14px', borderRadius: radius.pill, border: `1px solid ${colors.border}`,
+                    background: 'transparent', fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text,
+                    outline: 'none',
+                  }}
+                />
+                {winText.trim() && (
+                  <button onClick={handlePostWin} style={{
+                    padding: '8px 14px', borderRadius: radius.pill, background: '#FFFFFF', color: '#0D0D0D', border: 'none',
+                    fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
+                  }}>
+                    Post
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Win Cards */}
+            {allWins.map((win, i) => {
+              const isSup = supported[win.id]
+              return (
+                <motion.div key={win.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} style={{
+                  margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 16,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                      <img src={win.avatar} alt={win.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 700, color: colors.text }}>{win.name}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text3, letterSpacing: 0.5 }}>
+                        Season {win.season} · {win.time}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, marginBottom: 14 }}>
+                    {win.text}
+                  </div>
+                  <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${colors.border}`, paddingTop: 12 }}>
+                    <button onClick={() => toggleSupport(win.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+                      <svg width={16} height={16} viewBox="0 0 24 24" fill={isSup ? '#FFFFFF' : 'none'} stroke={isSup ? '#FFFFFF' : colors.text3} strokeWidth={1.8}>
+                        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                      </svg>
+                      <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: isSup ? colors.text : colors.text3 }}>
+                        Support · {win.supports + (isSup ? 1 : 0)}
+                      </span>
+                    </button>
+                    <button onClick={() => { /* Reply coming soon */ }} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+                      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={1.8}>
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                      </svg>
+                      <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: colors.text3 }}>
+                        Reply · {win.replies}
+                      </span>
+                    </button>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Seasons */}
+        {activeTab === 'Seasons' && (
+          <div style={{ marginTop: 20 }}>
+            {seasons.map((s, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
+                margin: '0 16px 16px', borderRadius: radius.card, overflow: 'hidden', position: 'relative', height: 160,
+              }}>
+                <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)' }} />
+                <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 36, fontWeight: 900, color: colors.text, lineHeight: 1 }}>S{s.number}</div>
+                      <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2, marginTop: 2 }}>
+                        {s.title} · {s.members} members
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '4px 12px', borderRadius: radius.pill,
+                      background: s.status === 'Active' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+                      fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+                      color: s.status === 'Active' ? colors.text : colors.text3,
+                      letterSpacing: 1, textTransform: 'uppercase',
+                    }}>{s.status}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Announcements */}
+        {activeTab === 'News' && (
+          <div style={{ marginTop: 20 }}>
+            {announcements.map((a, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
+                margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 18,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div style={{
+                    padding: '3px 10px', borderRadius: radius.pill,
+                    background: a.type === 'Opportunity' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
+                    fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
+                    color: a.type === 'Opportunity' ? colors.text : colors.text3,
+                    letterSpacing: 1, textTransform: 'uppercase',
+                  }}>{a.type}</div>
+                  <span style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3 }}>{a.time}</span>
+                </div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 16, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.2, marginBottom: 6 }}>{a.title}</div>
+                <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5 }}>{a.text}</div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  /* ── DESKTOP LAYOUT ── */
+
   return (
-    <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 120 }}>
+    <div style={{ height: '100%', overflowY: 'auto', paddingBottom: 80 }}>
       <AnimatePresence>
         {showCelebration && (
           <Celebration
@@ -81,162 +458,68 @@ export default function Community() {
           />
         )}
       </AnimatePresence>
-      <div style={{ padding: '56px 20px 0' }}>
-        <div style={{ fontFamily: fonts.sans, fontSize: 28, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1 }}>
-          Community
-        </div>
-        <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, marginTop: 6 }}>
-          Wins over likes. Support over competition.
-        </div>
-      </div>
 
-      {/* Tab Switcher */}
-      <div style={{ display: 'flex', margin: '20px 16px 0', background: colors.surface, borderRadius: radius.card, padding: 4 }}>
-        {tabs.map(t => (
-          <button key={t} onClick={() => setActiveTab(t)} style={{
-            flex: 1, padding: '10px 0', borderRadius: 12,
-            background: activeTab === t ? colors.text : 'transparent',
-            color: activeTab === t ? colors.bg : colors.text3,
-            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
-            cursor: 'pointer', transition: 'all 0.2s',
-          }}>
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* Wins */}
-      {activeTab === 'Wins' && (
-        <div style={{ marginTop: 20 }}>
-          {/* Share a Win */}
-          <div style={{ margin: '0 16px 16px', background: colors.surface, borderRadius: radius.card, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-              }}>
-                <img src={P.t1} alt="You" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
-              </div>
-              <input
-                value={winText}
-                onChange={e => setWinText(e.target.value)}
-                placeholder="Share a win..."
-                onKeyDown={e => e.key === 'Enter' && handlePostWin()}
-                style={{
-                  flex: 1, padding: '10px 14px', borderRadius: radius.pill, border: `1px solid ${colors.border}`,
-                  background: 'transparent', fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text,
-                  outline: 'none',
-                }}
-              />
-              {winText.trim() && (
-                <button onClick={handlePostWin} style={{
-                  padding: '8px 14px', borderRadius: radius.pill, background: '#FFFFFF', color: '#0D0D0D', border: 'none',
-                  fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
-                }}>
-                  Post
-                </button>
-              )}
-            </div>
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 32px' }}>
+        {/* Wide Header */}
+        <div style={{ padding: '48px 0 0' }}>
+          <div style={{ fontFamily: fonts.sans, fontSize: 38, fontWeight: 900, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, lineHeight: 1.1 }}>
+            Community
           </div>
-
-          {/* Win Cards */}
-          {allWins.map((win, i) => {
-            const isSup = supported[win.id]
-            return (
-              <motion.div key={win.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} style={{
-                margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 16,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-                    <img src={win.avatar} alt={win.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 700, color: colors.text }}>{win.name}</div>
-                    <div style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 500, color: colors.text3, letterSpacing: 0.5 }}>
-                      Season {win.season} · {win.time}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ fontFamily: fonts.sans, fontSize: 14, fontWeight: 400, color: colors.text2, lineHeight: 1.6, marginBottom: 14 }}>
-                  {win.text}
-                </div>
-                <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${colors.border}`, paddingTop: 12 }}>
-                  <button onClick={() => toggleSupport(win.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill={isSup ? '#FFFFFF' : 'none'} stroke={isSup ? '#FFFFFF' : colors.text3} strokeWidth={1.8}>
-                      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                    </svg>
-                    <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: isSup ? colors.text : colors.text3 }}>
-                      Support · {win.supports + (isSup ? 1 : 0)}
-                    </span>
-                  </button>
-                  <button onClick={() => { /* Reply coming soon */ }} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={1.8}>
-                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                    </svg>
-                    <span style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 600, color: colors.text3 }}>
-                      Reply · {win.replies}
-                    </span>
-                  </button>
-                </div>
-              </motion.div>
-            )
-          })}
+          <div style={{ fontFamily: fonts.sans, fontSize: 15, fontWeight: 400, color: colors.text2, marginTop: 8 }}>
+            Wins over likes. Support over competition.
+          </div>
         </div>
-      )}
 
-      {/* Seasons */}
-      {activeTab === 'Seasons' && (
-        <div style={{ marginTop: 20 }}>
-          {seasons.map((s, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
-              margin: '0 16px 16px', borderRadius: radius.card, overflow: 'hidden', position: 'relative', height: 160,
+        {/* Horizontal Tab Buttons */}
+        <div style={{ display: 'flex', gap: 8, margin: '28px 0 24px' }}>
+          {tabs.map(t => (
+            <button key={t} onClick={() => setActiveTab(t)} style={{
+              padding: '12px 28px', borderRadius: radius.card,
+              background: activeTab === t ? colors.text : colors.surface,
+              color: activeTab === t ? colors.bg : colors.text3,
+              fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'all 0.2s', border: 'none',
             }}>
-              <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)' }} />
-              <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontFamily: fonts.sans, fontSize: 36, fontWeight: 900, color: colors.text, lineHeight: 1 }}>S{s.number}</div>
-                    <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 500, color: colors.text2, marginTop: 2 }}>
-                      {s.title} · {s.members} members
-                    </div>
-                  </div>
-                  <div style={{
-                    padding: '4px 12px', borderRadius: radius.pill,
-                    background: s.status === 'Active' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
-                    fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
-                    color: s.status === 'Active' ? colors.text : colors.text3,
-                    letterSpacing: 1, textTransform: 'uppercase',
-                  }}>{s.status}</div>
-                </div>
-              </div>
-            </motion.div>
+              {t}
+            </button>
           ))}
         </div>
-      )}
 
-      {/* Announcements */}
-      {activeTab === 'News' && (
-        <div style={{ marginTop: 20 }}>
-          {announcements.map((a, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
-              margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 18,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{
-                  padding: '3px 10px', borderRadius: radius.pill,
-                  background: a.type === 'Opportunity' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
-                  fontFamily: fonts.sans, fontSize: 10, fontWeight: 600,
-                  color: a.type === 'Opportunity' ? colors.text : colors.text3,
-                  letterSpacing: 1, textTransform: 'uppercase',
-                }}>{a.type}</div>
-                <span style={{ fontFamily: fonts.sans, fontSize: 11, fontWeight: 400, color: colors.text3 }}>{a.time}</span>
+        {/* Wins Tab: 2-column layout */}
+        {activeTab === 'Wins' && (
+          <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+            {/* Main Feed */}
+            <div style={{ flex: '1 1 65%', minWidth: 0 }}>
+              {renderWinInput(true)}
+              {allWins.map((win, i) => renderWinCard(win, i, true))}
+            </div>
+            {/* Sidebar */}
+            {renderSidebar()}
+          </div>
+        )}
+
+        {/* Seasons Tab: 2-column grid of season cards */}
+        {activeTab === 'Seasons' && (
+          <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+            <div style={{ flex: '1 1 65%', minWidth: 0 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                {seasons.map((s, i) => renderSeasonCard(s, i, true))}
               </div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 16, fontWeight: 800, color: colors.text, textTransform: 'uppercase', letterSpacing: -0.2, marginBottom: 6 }}>{a.title}</div>
-              <div style={{ fontFamily: fonts.sans, fontSize: 13, fontWeight: 400, color: colors.text2, lineHeight: 1.5 }}>{a.text}</div>
-            </motion.div>
-          ))}
-        </div>
-      )}
+            </div>
+            {renderSidebar()}
+          </div>
+        )}
+
+        {/* News Tab: wider announcement list */}
+        {activeTab === 'News' && (
+          <div style={{ display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+            <div style={{ flex: '1 1 65%', minWidth: 0 }}>
+              {announcements.map((a, i) => renderAnnouncementCard(a, i, true))}
+            </div>
+            {renderSidebar()}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
