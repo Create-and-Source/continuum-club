@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
 import Celebration from '../components/Celebration'
