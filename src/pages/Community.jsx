@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import { get, set, increment } from '../store'
 
-const tabs = ['Wins', 'Seasons', 'Announcements']
+const tabs = ['Wins', 'Seasons', 'News']
 
 const defaultWins = [
   { id: 'w1', name: 'Jasmine R.', season: 14, avatar: P.t1, text: 'Booked my first paid editorial shoot this week. Corella gave me the confidence to pitch myself.', supports: 24, replies: 6, time: '2h ago' },
@@ -78,7 +78,7 @@ export default function Community() {
             flex: 1, padding: '10px 0', borderRadius: 12,
             background: activeTab === t ? colors.text : 'transparent',
             color: activeTab === t ? colors.bg : colors.text3,
-            fontFamily: fonts.sans, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+            fontFamily: fonts.sans, fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
             cursor: 'pointer', transition: 'all 0.2s',
           }}>
             {t}
@@ -196,7 +196,7 @@ export default function Community() {
       )}
 
       {/* Announcements */}
-      {activeTab === 'Announcements' && (
+      {activeTab === 'News' && (
         <div style={{ marginTop: 20 }}>
           {announcements.map((a, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
