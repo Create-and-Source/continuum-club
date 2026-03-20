@@ -444,7 +444,7 @@ export default function Home() {
         }}>
           How are you showing up today?
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
           {moods.map(m => (
             <button
               key={m}
