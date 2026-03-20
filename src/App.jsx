@@ -182,6 +182,7 @@ function GuestNav({ onBack }) {
     }}>
       <button onClick={onBack} style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer', padding: '4px 12px',
+        background: 'none', border: 'none',
       }}>
         <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6" />
@@ -193,6 +194,7 @@ function GuestNav({ onBack }) {
         return (
           <button key={link.path} onClick={() => navigate(link.path)} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer', padding: '4px 12px',
+            background: 'none', border: 'none',
           }}>
             <span style={{
               fontFamily: fonts.sans, fontSize: 12, fontWeight: active ? 700 : 500, color: active ? colors.accent : colors.text3,

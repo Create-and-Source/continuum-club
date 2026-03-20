@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
@@ -18,8 +18,7 @@ export default function Profile() {
   const navigate = useNavigate()
   const [unlockedBadge, setUnlockedBadge] = useState(null)
 
-  // Check for newly unlocked badges on mount
-  useState(() => {
+  useEffect(() => {
     const seen = get('seenBadges', [])
     for (const m of milestones) {
       if (m.check() && !seen.includes(m.id)) {
@@ -28,7 +27,7 @@ export default function Profile() {
         break
       }
     }
-  })
+  }, [])
 
   const [settings, setSettings] = useState(() => get('notifSettings', {
     sparkTime: '7:30 AM',

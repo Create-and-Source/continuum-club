@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { colors, fonts, radius, P } from '../theme'
 import BeforeAfterSlider from '../components/BeforeAfterSlider'
@@ -24,6 +25,7 @@ const badges = [
 ]
 
 export default function Journey() {
+  const [snapSaved, setSnapSaved] = useState(false)
   const maxValue = Math.max(...confidenceData.map(d => d.value))
 
   return (
@@ -267,11 +269,12 @@ export default function Journey() {
         transition={{ delay: 0.3 }}
         style={{ margin: '24px 16px 0' }}
       >
-        <button style={{
+        <button onClick={() => { setSnapSaved(true); setTimeout(() => setSnapSaved(false), 2000) }} style={{
           width: '100%',
           padding: '18px 24px',
           background: '#FFFFFF',
           color: '#0D0D0D',
+          border: 'none',
           borderRadius: radius.card,
           fontFamily: fonts.sans,
           fontSize: 15,
@@ -289,7 +292,7 @@ export default function Journey() {
             <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
             <circle cx="12" cy="13" r="4" />
           </svg>
-          Snap & Save
+          {snapSaved ? 'Saved!' : 'Snap & Save'}
         </button>
       </motion.div>
     </div>

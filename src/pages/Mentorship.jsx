@@ -97,7 +97,7 @@ export default function Mentorship() {
           <div style={{ fontFamily: fonts.sans, fontSize: 16, fontWeight: 800, color: colors.text, textTransform: 'uppercase' }}>Corella</div>
           <div style={{ fontFamily: fonts.sans, fontSize: 12, fontWeight: 400, color: colors.text3, marginTop: 2 }}>Your Mentor · Since Season 14</div>
         </div>
-        <button style={{
+        <button onClick={() => setActiveTab('Check-Ins')} style={{
           padding: '8px 16px', borderRadius: radius.pill, border: `1px solid ${colors.border}`, background: 'transparent',
           fontFamily: fonts.sans, fontSize: 11, fontWeight: 600, color: colors.text2, letterSpacing: 0.5, textTransform: 'uppercase', cursor: 'pointer',
         }}>Schedule</button>

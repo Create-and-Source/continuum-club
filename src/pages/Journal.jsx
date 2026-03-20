@@ -144,7 +144,7 @@ export default function Journal() {
           )}
           {displayEntries.map((e, i) => (
             <motion.div key={e.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} style={{
-              margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 16, cursor: 'pointer',
+              margin: '0 16px 12px', background: colors.surface, borderRadius: radius.card, padding: 16,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

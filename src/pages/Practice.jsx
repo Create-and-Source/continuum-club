@@ -227,7 +227,7 @@ export default function Practice() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 16px' }}>
           {playlists.map((pl, i) => (
-            <div key={i} style={{ position: 'relative', borderRadius: radius.card, overflow: 'hidden', height: 140, cursor: 'pointer' }}>
+            <div key={i} style={{ position: 'relative', borderRadius: radius.card, overflow: 'hidden', height: 140 }}>
               <img src={pl.image} alt={pl.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 100%)' }} />
               <div style={{ position: 'absolute', bottom: 12, left: 12 }}>

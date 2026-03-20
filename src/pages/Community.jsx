@@ -168,7 +168,7 @@ export default function Community() {
                       Support · {win.supports + (isSup ? 1 : 0)}
                     </span>
                   </button>
-                  <button style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
+                  <button onClick={() => { /* Reply coming soon */ }} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}>
                     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={colors.text3} strokeWidth={1.8}>
                       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                     </svg>
@@ -188,7 +188,7 @@ export default function Community() {
         <div style={{ marginTop: 20 }}>
           {seasons.map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{
-              margin: '0 16px 16px', borderRadius: radius.card, overflow: 'hidden', position: 'relative', height: 160, cursor: 'pointer',
+              margin: '0 16px 16px', borderRadius: radius.card, overflow: 'hidden', position: 'relative', height: 160,
             }}>
               <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)' }} />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 100%)' }} />
