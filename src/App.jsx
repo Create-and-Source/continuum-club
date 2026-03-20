@@ -34,7 +34,8 @@ export default function App() {
       margin: '0 auto',
       height: '100dvh',
       position: 'relative',
-      overflow: 'hidden',
+      overflowX: 'hidden',
+      overflowY: 'auto',
       background: '#0D0D0D',
     }}>
       <AnimatePresence>
